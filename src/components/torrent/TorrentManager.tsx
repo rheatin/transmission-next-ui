@@ -49,6 +49,8 @@ const statusTabs = [
     { value: "downloading", label: "Downloading", filter: [{ id: "Status", value: 4 }] },
     { value: "seeding", label: "Seeding", filter: [{ id: "Status", value: 6 }] },
     { value: "stopped", label: "Stopped", filter: [{ id: "Status", value: 0 }] },
+    { value: "error", label: "Error", filter: [{ id: "Error", value: -1 }] },
+    { value: "warning", label: "Warning", filter: [{ id: "Error", value: 0 }] },
 ]
 
 function getFilterCount(data: torrentSchema[], filter: { id: string, value: any }[]) {
@@ -65,6 +67,13 @@ function getFilterCount(data: torrentSchema[], filter: { id: string, value: any 
             else if (f.id === "Labels") {
                 const itemLabels = item.labels.map(label => parseLabel(label)).filter(label => label !== null).map(label => (label as TorrentLabel).text);
                 return itemLabels.some(label => (f.value as string[]).includes(label));
+            }
+            else if (f.id === "Error") {
+                if (f.value === -1) {
+                    return item.error !== 0;
+                } else if (f.value === 0) {
+                    return item.error === 0 && item.trackerStats.length > 0 && !item.trackerStats[0].lastAnnounceSucceeded;
+                }
             }
             return true;
         });
@@ -112,6 +121,12 @@ export function TorrentManager({
                 return item.status === f.value;
             } else if (f.id === "Download Speed") {
                 return item.rateDownload > f.value || item.rateUpload > f.value;
+            } else if (f.id === "Error") {
+                if (f.value === -1) {
+                    return item.error !== 0;
+                } else if (f.value === 0) {
+                    return item.error === 0 && item.trackerStats.length > 0 && !item.trackerStats[0].lastAnnounceSucceeded;
+                }
             }
             return true;
         }))
