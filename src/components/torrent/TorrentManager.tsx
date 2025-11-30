@@ -163,6 +163,8 @@ export function TorrentManager({
                             <SelectItem value="downloading">{t("Downloading")}</SelectItem>
                             <SelectItem value="seeding">{t("Seeding")}</SelectItem>
                             <SelectItem value="stopped">{t("Stopped")}</SelectItem>
+                            <SelectItem value="error">{t("Error")}</SelectItem>
+                            <SelectItem value="warning">{t("Warning")}</SelectItem>
                         </SelectContent>
                     </Select>
                     <TabsList
