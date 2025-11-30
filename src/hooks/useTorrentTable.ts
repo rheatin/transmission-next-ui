@@ -14,12 +14,23 @@ export function useTorrentTable({ tabFilterData, setRowAction }: UseTorrentTable
 
     const [rowSelection, setRowSelection] = useState({})
     const [sorting, setSorting] = useState<SortingState>([{ id: "Added Date", desc: true }])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+    const [columnVisibility, setColumnVisibilityState] = useState<VisibilityState>(() => {
+        const saved = localStorage.getItem(STORAGE_KEYS.COLUMN_VISIBILITY);
+        return saved ? JSON.parse(saved) : {};
+    })
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [pagination, setPagination] = useState({
         pageIndex: 0, pageSize: Number(localStorage.getItem(STORAGE_KEYS.PAGE_SIZE)) || 50,
     })
     const { t } = useTranslation();
+
+    const setColumnVisibility = (value: VisibilityState | ((prev: VisibilityState) => VisibilityState)) => {
+        setColumnVisibilityState((prev) => {
+            const newValue = typeof value === 'function' ? value(prev) : value;
+            localStorage.setItem(STORAGE_KEYS.COLUMN_VISIBILITY, JSON.stringify(newValue));
+            return newValue;
+        });
+    };
 
     const columns = useMemo(() => {
         return getColumns({ t, setRowAction });
