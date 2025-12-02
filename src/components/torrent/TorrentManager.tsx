@@ -93,6 +93,10 @@ export function TorrentManager({
     const [rowAction, setRowAction] = useState<RowAction | null>(null)
     const { isDragging } = useDragAndDropUpload({ setFile, setRowAction })
     const downloadDirs = Array.from(new Set([...initialData.map((item) => item.downloadDir), session["download-dir"] || ""]))
+    const downloadDirOptions = downloadDirs.filter(dir => !!dir).map(dir => ({ 
+        label: dir, 
+        value: dir 
+    }));
     const trackers = Array.from(new Set(initialData.flatMap((item) => item.trackerStats.map((tracker) => tracker.host)))).map((tracker) => ({
         label: tracker,
         value: tracker
@@ -217,6 +221,7 @@ export function TorrentManager({
                 <div className="flex shrink-0 items-center gap-2 sm:ml-0">
                     <ColumnFilter title={"Tracker"} column={table.getColumn("Tracker")} options={trackers} />
                     <ColumnFilter title={"Labels"} column={table.getColumn("Labels")} options={labels} />
+                    <ColumnFilter title={"Path"} column={table.getColumn("Path")} options={downloadDirOptions} />
                 </div>
             </div>
             <TabsContent value={tabValue} className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">

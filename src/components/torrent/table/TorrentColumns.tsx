@@ -270,6 +270,20 @@ export function getColumns({ t, setRowAction }: getColumnsProps): ColumnDef<torr
             }
         },
         {
+            id: "Path",
+            accessorKey: "downloadDir",
+            header: ({ column }) => <SortableHeader column={column} title={t("Path")} className="w-full justify-start" />,
+            cell: ({ row }) => (
+                <div className="break-all max-w-xs">
+                    {row.original.downloadDir}
+                </div>
+            ),
+            filterFn: (row, columnId, filterValue: string[]) => {
+                const value = row.getValue(columnId) as string;
+                return filterValue.includes(value);
+            },
+        },
+        {
             id: "actions",
             cell: ({ row }: {
                 row: Row<torrentSchema>;
