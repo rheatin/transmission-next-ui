@@ -82,7 +82,7 @@ export function EditDialog({ open, onOpenChange, targetRows, directories }: { op
                     </div>
                     <div className="py-2 flex items-center gap-2">
                         <Label>{t("Move data")}</Label>
-                        <Checkbox id="move" checked={moveData} onCheckedChange={() => setMoveData(!moveData)} />
+                        <Checkbox id="move" checked={moveData} onCheckedChange={(checked) => setMoveData(checked as boolean)} />
                     </div>
                 </div>
                 <DialogFooter>
