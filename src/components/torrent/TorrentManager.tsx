@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { Label } from "@/components/ui/label.tsx"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu.tsx"
+import { EditableLabel } from "@/components/ui/editable-label.tsx"
 import {
     Select,
     SelectContent,
@@ -85,9 +86,13 @@ function getFilterCount(data: torrentSchema[], filter: { id: string, value: any 
 export function TorrentManager({
     data: initialData,
     session: session,
+    refetchInterval,
+    setRefetchInterval,
 }: {
     data: z.infer<typeof schema>[],
-    session: TransmissionSession
+    session: TransmissionSession,
+    refetchInterval: number,
+    setRefetchInterval: (interval: number) => void,
 }) {
     const [file, setFile] = useState<File | null>(null)
     const [rowAction, setRowAction] = useState<RowAction | null>(null)
@@ -146,9 +151,18 @@ export function TorrentManager({
         table.setPagination(prev => ({ ...prev, pageIndex: 0 }))
     }
 
+    const handleIntervalChange = (intervalInSeconds: number) => {
+        if (intervalInSeconds < 1) {
+            intervalInSeconds = 1;
+        }
+        const intervalInMilliseconds = intervalInSeconds * 1000;
+        setRefetchInterval(intervalInMilliseconds);
+        localStorage.setItem("refetch-interval", JSON.stringify(intervalInMilliseconds));
+    };
+
     return (
         <Tabs value={tabValue} onValueChange={handleTabChange} className="w-full flex-col justify-start gap-4">
-            <div className="flex flex-wrap items-center w-full gap-2 px-4 lg:px-6">
+            <div className="flex justify-between items-center w-full gap-2 px-4 lg:px-6">
                 <div className="flex shrink-0 items-center gap-2">
                     <Label htmlFor="view-selector" className="sr-only">
                         View
@@ -182,7 +196,28 @@ export function TorrentManager({
                         ))}
                     </TabsList>
                 </div>
-
+                <div className="flex items-center gap-2 ml-auto">
+                    <IconRefresh />
+                    <EditableLabel
+                        value={refetchInterval / 1000}
+                        onChange={handleIntervalChange}
+                    />
+                </div>
+            </div>
+            <div className="flex flex-wrap items-center w-full gap-2 px-4 lg:px-6">
+                <div className="flex min-w-[150px] w-full sm:flex-none sm:w-1/3">
+                    <Input
+                        type="text"
+                        placeholder={t("Search ...")}
+                        value={table.getColumn("Name")?.getFilterValue() as string}
+                        onChange={(e) => table.getColumn("Name")?.setFilterValue(e.target.value)}
+                    />
+                </div>
+                <div className="flex shrink-0 items-center gap-2 sm:ml-0">
+                    <ColumnFilter title={"Tracker"} column={table.getColumn("Tracker")} options={trackers} />
+                    <ColumnFilter title={"Labels"} column={table.getColumn("Labels")} options={labels} />
+                    <ColumnFilter title={"Path"} column={table.getColumn("Path")} options={downloadDirOptions} />
+                </div>
                 <div className="flex shrink-0 items-center gap-2 ml-auto">
                     <ColumnView columns={table.getAllColumns()} />
                     <Button variant="outline" size="sm" onClick={() => setRowAction({ dialogType: DialogType.Add, targetRows: [] })}>
@@ -207,21 +242,6 @@ export function TorrentManager({
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </div>
-            </div>
-            <div className="flex flex-wrap items-center w-full gap-2 px-4 lg:px-6">
-                <div className="flex min-w-[150px] w-full sm:flex-none sm:w-1/3">
-                    <Input
-                        type="text"
-                        placeholder={t("Search ...")}
-                        value={table.getColumn("Name")?.getFilterValue() as string}
-                        onChange={(e) => table.getColumn("Name")?.setFilterValue(e.target.value)}
-                    />
-                </div>
-                <div className="flex shrink-0 items-center gap-2 sm:ml-0">
-                    <ColumnFilter title={"Tracker"} column={table.getColumn("Tracker")} options={trackers} />
-                    <ColumnFilter title={"Labels"} column={table.getColumn("Labels")} options={labels} />
-                    <ColumnFilter title={"Path"} column={table.getColumn("Path")} options={downloadDirOptions} />
                 </div>
             </div>
             <TabsContent value={tabValue} className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
