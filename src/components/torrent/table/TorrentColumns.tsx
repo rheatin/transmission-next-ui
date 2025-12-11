@@ -84,12 +84,15 @@ export function getColumns({ t, setRowAction }: getColumnsProps): ColumnDef<torr
             id: "Percentage",
             accessorKey: "percentDone",
             header: ({ column }) => <SortableHeader column={column} title={t("Percentage")} />,
-            cell: ({ row }) => (
-                <div className="w-32">
-                    <Progress value={row.original.percentDone * 100} className="w-[60%]" />
-                    {(row.original.percentDone * 100).toFixed(2)}%
-                </div>
-            ),
+            cell: ({ row }) => {
+                const progress = row.original.status === 2 ? row.original.recheckProgress : row.original.percentDone; -- // rechecking status
+                return (
+                    <div className="w-32">
+                        <Progress value={progress * 100} className="w-[60%]" />
+                        {(progress * 100).toFixed(2)}%
+                    </div>
+                )
+            },
         },
         {
             id: "eta",
