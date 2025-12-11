@@ -85,7 +85,7 @@ export function getColumns({ t, setRowAction }: getColumnsProps): ColumnDef<torr
             accessorKey: "percentDone",
             header: ({ column }) => <SortableHeader column={column} title={t("Percentage")} />,
             cell: ({ row }) => {
-                const progress = row.original.status === 2 ? row.original.recheckProgress : row.original.percentDone; -- // rechecking status
+                const progress = row.original.status === 2 ? row.original.recheckProgress : row.original.percentDone // rechecking status
                 return (
                     <div className="w-32">
                         <Progress value={progress * 100} className="w-[60%]" />
