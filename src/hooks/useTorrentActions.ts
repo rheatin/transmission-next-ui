@@ -2,6 +2,7 @@ import {
     addTorrent,
     startTorrent,
     stopTorrent,
+    verifyTorrent,
     deleteTorrent,
     renamePath,
     setLocation,
@@ -162,6 +163,31 @@ export function useStopTorrent() {
         onError: (error) => {
             console.error("Error stopping torrent:", error);
             toast.error(t("Failed to stop torrent"), {
+                "position": "top-right"
+            }
+            );
+        }
+    });
+}
+
+export function useVerifyTorrent() {
+    const queryClient = useQueryClient();
+    const { t } = useTranslation();
+    return useMutation({
+        mutationFn: async (ids: number[]) => {
+            await verifyTorrent({
+                ids: ids,
+            });
+        },
+        onSuccess: () => {
+            toast.success(t("Torrent start verifying"), {
+                "position": "top-right",
+            });
+            setTimeout(() => { queryClient.refetchQueries({ queryKey: ["torrent"] }); }, 1000);
+        },
+        onError: (error) => {
+            console.error("Error verifying torrent:", error);
+            toast.error(t("Failed to verify torrent"), {
                 "position": "top-right"
             }
             );

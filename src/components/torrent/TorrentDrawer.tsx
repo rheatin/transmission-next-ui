@@ -136,7 +136,9 @@ export function TorrentDrawer({ item }: { item: torrentSchema }) {
                                 </TableHeader>
                                 <TableBody>
                                     {torrentData.torrents[0].peers.map((peer, index) => {
-                                        const progress = (peer.progress * 100).toFixed(1)
+                                        const progress = torrentData.torrents[0].status === 2
+                                            ? (torrentData.torrents[0].recheckProgress * 100).toFixed(1)
+                                            : (peer.progress * 100).toFixed(1); // 2 is verifying status
                                         return (
                                             <TableRow key={index} className={index % 2 === 0 ? 'bg-muted/40' : ''}>
                                                 <TableCell>{peer.address}</TableCell>

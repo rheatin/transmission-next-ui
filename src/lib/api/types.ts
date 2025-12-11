@@ -186,6 +186,7 @@ export interface Torrent {
     rateUpload: number;
     peers: Peer[];
     files: TorrentFile[];
+    recheckProgress: number;
 }
 
 export interface GetTorrentResponse {
