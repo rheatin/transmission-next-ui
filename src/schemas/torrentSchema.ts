@@ -5,6 +5,7 @@ export const schema = z.object({
     name: z.string(),
     totalSize: z.number(),
     percentDone: z.number(),
+    recheckProgress: z.number(),
     status: z.number(),
     rateDownload: z.number(),
     rateUpload: z.number(),
