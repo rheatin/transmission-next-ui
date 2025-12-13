@@ -89,6 +89,13 @@ export interface TransmissionSession {
     "speed-limit-down-enabled"?: boolean;
     "speed-limit-up"?: number;
     "speed-limit-up-enabled"?: boolean;
+    "alt-speed-down"?: number;
+    "alt-speed-up"?: number;
+    "alt-speed-enabled"?: boolean;
+    "alt-speed-time-begin"?: number;
+    "alt-speed-time-end"?: number;
+    "alt-speed-time-enabled"?: boolean;
+    "alt-speed-time-day"?: number;
     "incomplete-dir"?: string;
     "incomplete-dir-enabled"?: boolean;
     "peer-port"?: number;

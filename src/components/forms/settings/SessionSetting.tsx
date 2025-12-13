@@ -12,6 +12,7 @@ import { usePortTest, useSetSession } from "@/hooks/useTorrentActions.ts";
 import { Switch } from "@/components/ui/switch.tsx";
 import { useTranslation } from "react-i18next";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { STORAGE_KEYS } from "@/constants/storage.ts";
 import { toast } from "sonner";
 
@@ -43,10 +44,36 @@ export function SessionSetting() {
     const [idleSeedingLimit, setIdleSeedingLimit] = useState(0);
     const [idleSeedingLimitEnabled, setIdleSeedingLimitEnabled] = useState(false);
     const [clientNetworkSpeedSummary, setClientNetworkSpeedSummary] = useState(localStorage.getItem(STORAGE_KEYS.CLIENT_NETWORK_SPEED_SUMMARY) === "true");
+    const [altSpeedDown, setAltSpeedDown] = useState(0);
+    const [altSpeedUp, setAltSpeedUp] = useState(0);
+    const [altSpeedEnabled, setAltSpeedEnabled] = useState(false);
+    const [altSpeedTimeBegin, setAltSpeedTimeBegin] = useState(0);
+    const [altSpeedTimeEnd, setAltSpeedTimeEnd] = useState(0);
+    const [altSpeedTimeEnabled, setAltSpeedTimeEnabled] = useState(false);
+    const [altSpeedTimeDay, setAltSpeedTimeDay] = useState(0);
     const setSession = useSetSession();
     const portTest = usePortTest();
     const { t } = useTranslation();
     const [encryption, setEncryption] = useState("");
+
+    function minutesToTime(minutes: number): string {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    }
+
+    function timeToMinutes(time: string): number {
+        const [hours, mins] = time.split(':').map(Number);
+        return (hours || 0) * 60 + (mins || 0);
+    }
+
+    function isDayEnabled(dayMask: number, dayIndex: number): boolean {
+        return (dayMask & (1 << dayIndex)) !== 0;
+    }
+
+    function toggleDay(dayMask: number, dayIndex: number): number {
+        return dayMask ^ (1 << dayIndex);
+    }
 
     function refreshData() {
         getSession().then((session: TransmissionSession) => {
@@ -77,6 +104,13 @@ export function SessionSetting() {
             setSeedRatioLimited(session?.["seedRatioLimited"] ?? false);
             setIdleSeedingLimit(session?.["idle-seeding-limit"] ?? 0);
             setIdleSeedingLimitEnabled(session?.["idle-seeding-limit-enabled"] ?? false);
+            setAltSpeedDown(session?.["alt-speed-down"] ?? 0);
+            setAltSpeedUp(session?.["alt-speed-up"] ?? 0);
+            setAltSpeedEnabled(session?.["alt-speed-enabled"] ?? false);
+            setAltSpeedTimeBegin(session?.["alt-speed-time-begin"] ?? 0);
+            setAltSpeedTimeEnd(session?.["alt-speed-time-end"] ?? 0);
+            setAltSpeedTimeEnabled(session?.["alt-speed-time-enabled"] ?? false);
+            setAltSpeedTimeDay(session?.["alt-speed-time-day"] ?? 0);
         });
     }
 
@@ -139,6 +173,115 @@ export function SessionSetting() {
                             </div>
                             <hr />
                             <div>
+                                <h3 className="text-lg font-medium">{t("Alternative Bandwidth Limits")}</h3>
+                            </div>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center space-x-4 xl:w-1/2">
+                                    <Label htmlFor="alt-speed-enabled" className="whitespace-nowrap w-50">{t("Enable alternative speed")}</Label>
+                                    <Switch
+                                        id="alt-speed-enabled"
+                                        checked={altSpeedEnabled}
+                                        onCheckedChange={(checked) => setAltSpeedEnabled(!!checked)}
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-4 xl:w-1/2">
+                                    <Label htmlFor="alt-upload-limit-enabled" className="whitespace-nowrap w-30">{t("Alternative upload limit")}</Label>
+                                    <div className="flex items-center space-x-2 ml-auto">
+                                        <NumericInput
+                                            id="alt-upload-limit"
+                                            value={altSpeedUp}
+                                            onChange={setAltSpeedUp}
+                                            className="w-32"
+                                            disabled={!altSpeedEnabled}
+                                        />
+                                        <span className="text-sm text-muted-foreground">{t("KB/s")}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4 xl:w-1/2">
+                                    <Label htmlFor="alt-download-limit-enabled" className="whitespace-nowrap w-50">{t("Alternative download limit")}</Label>
+                                    <div className="flex items-center space-x-2 ml-auto">
+                                        <NumericInput
+                                            id="alt-download-limit"
+                                            value={altSpeedDown}
+                                            onChange={setAltSpeedDown}
+                                            className="w-32"
+                                            disabled={!altSpeedEnabled}
+                                        />
+                                        <span className="text-sm text-muted-foreground">{t("KB/s")}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-md font-medium">{t("Scheduled times")}</h4>
+                                </div>
+                                <div className="flex items-center space-x-4 xl:w-1/2">
+                                    <Label htmlFor="alt-speed-time-enabled" className="whitespace-nowrap w-50">{t("Enable scheduled times")}</Label>
+                                    <Switch
+                                        id="alt-speed-time-enabled"
+                                        checked={altSpeedTimeEnabled}
+                                        onCheckedChange={(checked) => setAltSpeedTimeEnabled(!!checked)}
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-4 xl:w-1/2">
+                                    <Label htmlFor="alt-speed-time-begin" className="whitespace-nowrap w-30">{t("Start time")}</Label>
+                                    <div className="flex items-center space-x-2 ml-auto">
+                                        <Input
+                                            id="alt-speed-time-begin"
+                                            type="time"
+                                            value={minutesToTime(altSpeedTimeBegin)}
+                                            onChange={(e) => setAltSpeedTimeBegin(timeToMinutes(e.target.value))}
+                                            className="w-32"
+                                            disabled={!altSpeedTimeEnabled}
+                                        />
+                                    </div>    
+                                </div>
+                                <div className="flex items-center space-x-4 xl:w-1/2">
+                                    <Label htmlFor="alt-speed-time-end" className="whitespace-nowrap w-30">{t("End time")}</Label>
+                                    <div className="flex items-center space-x-2 ml-auto">
+                                        <Input
+                                            id="alt-speed-time-end"
+                                            type="time"
+                                            value={minutesToTime(altSpeedTimeEnd)}
+                                            onChange={(e) => setAltSpeedTimeEnd(timeToMinutes(e.target.value))}
+                                            className="w-32"
+                                            disabled={!altSpeedTimeEnabled}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col space-y-3 xl:w-1/2">
+                                    <Label className="text-sm font-medium">{t("Days")}</Label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                                        {[
+                                            { key: "Sunday", index: 0 },
+                                            { key: "Monday", index: 1 },
+                                            { key: "Tuesday", index: 2 },
+                                            { key: "Wednesday", index: 3 },
+                                            { key: "Thursday", index: 4 },
+                                            { key: "Friday", index: 5 },
+                                            { key: "Saturday", index: 6 }
+                                        ].map(({ key, index }) => (
+                                            <div 
+                                                key={key} 
+                                                className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors"
+                                            >
+                                                <Checkbox
+                                                    id={`alt-speed-day-${index}`}
+                                                    checked={isDayEnabled(altSpeedTimeDay, index)}
+                                                    onCheckedChange={() => setAltSpeedTimeDay(toggleDay(altSpeedTimeDay, index))}
+                                                    disabled={!altSpeedTimeEnabled}
+                                                />
+                                                <Label 
+                                                    htmlFor={`alt-speed-day-${index}`} 
+                                                    className="text-sm font-normal cursor-pointer flex-1 leading-none"
+                                                >
+                                                    {t(key)}
+                                                </Label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr />
+                            <div>
                                 <h3 className="text-lg font-medium">{t("Seeding Limits")}</h3>
                             </div>
                             <div className="flex flex-col gap-4">
@@ -189,6 +332,13 @@ export function SessionSetting() {
                                     "speed-limit-up-enabled": uploadLimitEnabled,
                                     "speed-limit-down": downloadLimit,
                                     "speed-limit-down-enabled": downloadLimitEnabled,
+                                    "alt-speed-up": altSpeedUp,
+                                    "alt-speed-down": altSpeedDown,
+                                    "alt-speed-enabled": altSpeedEnabled,
+                                    "alt-speed-time-begin": altSpeedTimeBegin,
+                                    "alt-speed-time-end": altSpeedTimeEnd,
+                                    "alt-speed-time-enabled": altSpeedTimeEnabled,
+                                    "alt-speed-time-day": altSpeedTimeDay,
                                     "seedRatioLimit": seedRatioLimit,
                                     "seedRatioLimited": seedRatioLimited,
                                     "idle-seeding-limit": idleSeedingLimit,

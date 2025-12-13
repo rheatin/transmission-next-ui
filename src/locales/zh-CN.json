@@ -192,5 +192,21 @@
   "Verify Torrents": "校验选中的种子",
   "Torrent start verifying": "种子开始校验",
   "Failed to verify torrent": "校验种子失败",
-  "Verify": "校验"
+  "Verify": "校验",
+  "Alternative Bandwidth Limits": "备用带宽限制",
+  "Alternative upload limit": "备用上传限速",
+  "Alternative download limit": "备用下载限速",
+  "Enable alternative speed": "启用备用速度",
+  "Scheduled times": "计划时间",
+  "Enable scheduled times": "启用计划时间",
+  "Start time": "开始时间",
+  "End time": "结束时间",
+  "Days": "日期",
+  "Sunday": "星期日",
+  "Monday": "星期一",
+  "Tuesday": "星期二",
+  "Wednesday": "星期三",
+  "Thursday": "星期四",
+  "Friday": "星期五",
+  "Saturday": "星期六"
 }

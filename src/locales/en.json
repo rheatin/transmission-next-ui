@@ -194,5 +194,21 @@
   "Verify Torrents": "Verify Torrents",
   "Torrent start verifying": "Torrent start verifying",
   "Failed to verify torrent": "Failed to verify torrent",
-  "Verify": "Verify"
+  "Verify": "Verify",
+  "Alternative Bandwidth Limits": "Alternative Bandwidth Limits",
+  "Alternative upload limit": "Alternative upload limit",
+  "Alternative download limit": "Alternative download limit",
+  "Enable alternative speed": "Enable alternative speed",
+  "Scheduled times": "Scheduled times",
+  "Enable scheduled times": "Enable scheduled times",
+  "Start time": "Start time",
+  "End time": "End time",
+  "Days": "Days",
+  "Sunday": "Sunday",
+  "Monday": "Monday",
+  "Tuesday": "Tuesday",
+  "Wednesday": "Wednesday",
+  "Thursday": "Thursday",
+  "Friday": "Friday",
+  "Saturday": "Saturday"
 }
