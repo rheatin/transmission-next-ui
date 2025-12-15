@@ -1,8 +1,8 @@
 import { flexRender, Table as ReactTable } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx"
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu.tsx"
-import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight, IconEdit, IconPlayerPlay, IconPlayerStop, IconTrash, IconFolderCheck } from "@tabler/icons-react"
-import { useStartTorrent, useStopTorrent, useVerifyTorrent } from "@/hooks/useTorrentActions.ts"
+import { IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight, IconEdit, IconPlayerPlay, IconPlayerStop, IconTrash, IconFolderCheck, IconBuildingBroadcastTower } from "@tabler/icons-react"
+import { useStartTorrent, useStopTorrent, useVerifyTorrent, useReannounceTorrent } from "@/hooks/useTorrentActions.ts"
 import { Label } from "@/components/ui/label.tsx"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx"
 import { Button } from "@/components/ui/button.tsx"
@@ -30,6 +30,7 @@ export function TorrentTable({ table, setRowAction }: TorrentTableProps) {
     const startTorrent = useStartTorrent();
     const stopTorrent = useStopTorrent();
     const verifyTorrent = useVerifyTorrent();
+    const reannounceTorrent = useReannounceTorrent();
     const { t } = useTranslation();
     const rows = table.getRowModel().rows;
 
@@ -95,6 +96,10 @@ export function TorrentTable({ table, setRowAction }: TorrentTableProps) {
                                             <IconFolderCheck className="mr-2 h-4 w-4 text-blue-500" />
                                             {t("Verify")}
                                     </ContextMenuItem>
+                                    <ContextMenuItem onClick={() => reannounceTorrent.mutate([row.original.id])}>
+                                            <IconBuildingBroadcastTower className="mr-2 h-4 w-4 text-blue-500" />
+                                            {t("Reannounce")}
+                                    </ContextMenuItem>
                                     <DialogTrigger asChild onClick={() => {
                                         setRowAction({
                                             dialogType: DialogType.Delete,
@@ -120,6 +125,10 @@ export function TorrentTable({ table, setRowAction }: TorrentTableProps) {
                                                 <ContextMenuItem onClick={() => verifyTorrent.mutate(table.getSelectedRowModel().rows.map(row => row.original.id))}>
                                                     <IconFolderCheck className="mr-2 h-4 w-4 text-blue-500" />
                                                     {t("Verify Torrents")}
+                                                </ContextMenuItem>
+                                                <ContextMenuItem onClick={() => reannounceTorrent.mutate(table.getSelectedRowModel().rows.map(row => row.original.id))}>
+                                                    <IconBuildingBroadcastTower className="mr-2 h-4 w-4 text-blue-500" />
+                                                    {t("Reannounce Torrents")}
                                                 </ContextMenuItem>
                                                 <DialogTrigger asChild onClick={() => {
                                                     setRowAction({

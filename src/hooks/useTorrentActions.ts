@@ -3,6 +3,7 @@ import {
     startTorrent,
     stopTorrent,
     verifyTorrent,
+    reannounceTorrent,
     deleteTorrent,
     renamePath,
     setLocation,
@@ -188,6 +189,31 @@ export function useVerifyTorrent() {
         onError: (error) => {
             console.error("Error verifying torrent:", error);
             toast.error(t("Failed to verify torrent"), {
+                "position": "top-right"
+            }
+            );
+        }
+    });
+}
+
+export function useReannounceTorrent() {
+    const queryClient = useQueryClient();
+    const { t } = useTranslation();
+    return useMutation({
+        mutationFn: async (ids: number[]) => {
+            await reannounceTorrent({
+                ids: ids,
+            });
+        },
+        onSuccess: () => {
+            toast.success(t("Torrent start reannouncing"), {
+                "position": "top-right",
+            });
+            setTimeout(() => { queryClient.refetchQueries({ queryKey: ["torrent"] }); }, 1000);
+        },
+        onError: (error) => {
+            console.error("Error reannouncing torrent:", error);
+            toast.error(t("Failed to reannounce torrent"), {
                 "position": "top-right"
             }
             );

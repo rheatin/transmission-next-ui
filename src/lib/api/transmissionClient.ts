@@ -128,6 +128,15 @@ export const verifyTorrent = async (options: StopTorrentOptions) => {
     return response.data.arguments;
 };
 
+export const reannounceTorrent = async (options: StopTorrentOptions) => {
+    const payload = {
+        method: 'torrent-reannounce',
+        arguments: options
+    }
+    const response = await transmission.post('', payload);
+    return response.data.arguments;
+};
+
 export const renamePath = async (options: RenamePathOptions) => {
     const payload = {
         method: 'torrent-rename-path',

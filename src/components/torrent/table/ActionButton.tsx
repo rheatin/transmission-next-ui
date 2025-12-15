@@ -1,9 +1,9 @@
-import { IconDotsVertical, IconEdit, IconPlayerPlay, IconPlayerStop, IconTrash, IconFolderCheck } from "@tabler/icons-react";
+import { IconDotsVertical, IconEdit, IconPlayerPlay, IconPlayerStop, IconTrash, IconFolderCheck, IconBuildingBroadcastTower } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button.tsx";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu.tsx";
 import { useTranslation } from "react-i18next";
 import { Row } from "@tanstack/react-table";
-import { useStartTorrent, useStopTorrent, useVerifyTorrent } from "@/hooks/useTorrentActions.ts";
+import { useStartTorrent, useStopTorrent, useVerifyTorrent, useReannounceTorrent } from "@/hooks/useTorrentActions.ts";
 import { torrentSchema } from "@/schemas/torrentSchema.ts";
 import { RowAction } from "@/lib/utils/rowAction.ts";
 import { DialogType } from "@/lib/api/types.ts";
@@ -19,6 +19,7 @@ export function ActionButton({ row, setRowAction }: ActionButtonProps) {
     const stopTorrent = useStopTorrent();
     const startTorrent = useStartTorrent();
     const verifyTorrent = useVerifyTorrent();
+    const reannounceTorrent = useReannounceTorrent();
 
     return (
             <DropdownMenu>
@@ -55,6 +56,10 @@ export function ActionButton({ row, setRowAction }: ActionButtonProps) {
                     <DropdownMenuItem onClick={() => verifyTorrent.mutate([row.original.id])}>
                             <IconFolderCheck className="mr-2 h-4 w-4 text-blue-500" />
                             {t("Verify")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => reannounceTorrent.mutate([row.original.id])}>
+                            <IconBuildingBroadcastTower className="mr-2 h-4 w-4 text-blue-500" />
+                            {t("Reannounce")}
                     </DropdownMenuItem>
                     <DropdownMenuItem variant="destructive" onSelect={() => {setRowAction({ dialogType: DialogType.Delete, targetRows: [row] })}}>
                         <IconTrash className="mr-2 h-4 w-4 text-red-500" />
