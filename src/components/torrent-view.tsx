@@ -91,7 +91,20 @@ interface TorrentViewProps {
 export function TorrentView({ title, statusFilter, showStats = true }: TorrentViewProps) {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list")
   const [selectedIds, setSelectedIds] = useState<number[]>([])
-  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null)
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(() => {
+    try {
+      const stored = localStorage.getItem('torrent-sort-config')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed && typeof parsed === 'object' && 'key' in parsed && 'direction' in parsed) {
+          return parsed as { key: string, direction: 'asc' | 'desc' }
+        }
+      }
+    } catch {
+      // ignore invalid storage value
+    }
+    return null
+  })
   const [torrents, setTorrents] = useState<Torrent[]>([])
   const [stats, setStats] = useState<SessionStats | null>(null)
   const [freeSpace, setFreeSpace] = useState<{ path: string, "size-bytes": number, total_size: number } | null>(null)
@@ -121,6 +134,14 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
       setIsStatsCollapsed(saved === 'true')
     }
   }, [])
+
+  useEffect(() => {
+    if (sortConfig) {
+      localStorage.setItem('torrent-sort-config', JSON.stringify(sortConfig))
+    } else {
+      localStorage.removeItem('torrent-sort-config')
+    }
+  }, [sortConfig])
 
   const toggleStats = () => {
     const newVal = !isStatsCollapsed
@@ -178,7 +199,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
         "id", "name", "status", "totalSize", "percentDone", "recheckProgress",
         "rateDownload", "rateUpload", "eta", "error",
         "errorString", "downloadDir", "uploadedEver",
-        "downloadedEver", "uploadRatio", "trackerStats", "labels"
+        "downloadedEver", "uploadRatio", "trackerStats", "labels", "addedDate"
       ]
 
       const torrentsData = await rpc.getTorrents(torrentFields)
@@ -994,6 +1015,12 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                     >
                       <div className="flex items-center justify-end">{t('common.eta')} <SortIcon column="eta" /></div>
                     </TableHead>
+                    <TableHead
+                      className="w-[130px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                      onClick={() => handleSort('addedDate')}
+                    >
+                      <div className="flex items-center justify-end">{t('common.added_date')} <SortIcon column="addedDate" /></div>
+                    </TableHead>
                     <TableHead className="text-center w-[130px] h-12 pr-6">{t('common.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1032,7 +1059,8 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                           torrent.status === 4 ? "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400" :
                             torrent.status === 6 ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-400" :
                               torrent.status === 0 ? "bg-muted text-muted-foreground/70" :
-                                "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400"
+                                torrent.status === 1 || torrent.status === 2 ? "bg-orange-100 text-orange-800 dark:bg-orange-950/30 dark:text-orange-400" :
+                                  "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400"
                         )}>
                           {t(getStatusLabel(torrent.status))}
                         </span>
@@ -1056,6 +1084,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                           <span className="text-label lowercase">{formatDuration(torrent.eta)}</span>
                         </div>
                       </TableCell>
+                      <TableCell className="text-right">{torrent.addedDate ? new Date(torrent.addedDate * 1000).toLocaleString() : t('common.unknown', 'Unknown')}</TableCell>
                       <TableCell className="w-[130px] pr-6">
                         <div className="flex items-center justify-center gap-1">
                           <EditTorrentDialog torrent={torrent}>
@@ -1074,12 +1103,6 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                           )}
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => handleSingleAction(torrent.id, "remove")}>
                             <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:bg-blue-500/10 hover:text-blue-500 transition-colors" onClick={() => handleSingleAction(torrent.id, "reannounce")}>
-                            <Megaphone className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-500 hover:bg-orange-500/10 hover:text-orange-500 transition-colors" onClick={() => handleSingleAction(torrent.id, "recheck")}>
-                            <PackageCheck className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

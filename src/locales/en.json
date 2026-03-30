@@ -80,6 +80,7 @@
     "reannounce_desc": "Selected torrents reannounced to trackers",
     "recheck": "Recheck",
     "recheck_success": "Recheck Started",
+    "added_date": "Added Date",
     "recheck_desc": "Selected torrents are being rechecked",
     "or": "Or",
     "magnet_link": "Magnet Link",
@@ -112,7 +113,8 @@
     "mode_global": "Follow Global",
     "mode_single": "Independent",
     "mode_unlimited": "Unlimited",
-    "tracker_list_hint": "Enter one URL per line. Use a blank line to separate tracker tiers."
+    "tracker_list_hint": "Enter one URL per line. Use a blank line to separate tracker tiers.",
+    "added_date": "Added Date"
   },
   "details": {
     "general": "General",
