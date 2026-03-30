@@ -63,7 +63,7 @@ import {
 import { AddTorrentDialog } from "@/components/add-torrent-dialog"
 import { EditTorrentDialog } from "@/components/edit-torrent-dialog"
 import { BatchReplaceTrackerDialog } from "@/components/batch-replace-tracker-dialog"
-import { cn } from "@/lib/utils"
+import { cn, filterTorrentByStatus } from "@/lib/utils"
 import { toast } from "sonner"
 import { RemoveTorrentDialog } from "@/components/remove-torrent-dialog"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -340,24 +340,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
   }
 
   const statusFiltered = statusFilter
-    ? torrents.filter(tor => {
-      const filter = statusFilter.toLowerCase()
-      if (filter === 'active') {
-        return tor.rateDownload > 0 || tor.rateUpload > 0
-      }
-      if (filter === 'downloading') {
-        return tor.status === 4 || tor.status === 3 || tor.status === 2 || tor.status === 1
-      }
-      if (filter === 'seeding') {
-        return tor.status === 6 || tor.status === 5
-      }
-      if (filter === 'stopped' || filter === 'paused') {
-        return tor.status === 0
-      }
-      // Fallback to text matching
-      const statusText = t(getStatusLabel(tor.status)).toLowerCase()
-      return statusText.includes(filter)
-    })
+    ? torrents.filter(tor => filterTorrentByStatus(tor, statusFilter, t))
     : torrents;
 
   const trackerFiltered = trackerFilter.length > 0
