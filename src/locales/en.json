@@ -94,6 +94,7 @@
     "reannounce_desc": "Selected torrents reannounced to trackers",
     "recheck": "Recheck",
     "recheck_success": "Recheck Started",
+    "added_date": "Added Date",
     "recheck_desc": "Selected torrents are being rechecked",
     "or": "Or",
     "magnet_link": "Magnet Link",
@@ -147,7 +148,8 @@
     "set_labels_overwrite_hint": "Replace all existing labels on selected torrents",
     "set_labels_append_hint": "Add new labels to existing labels on selected torrents",
     "set_labels_confirm": "Apply to {count} torrents",
-    "set_labels_success": "Successfully set labels for {count} torrents"
+    "set_labels_success": "Successfully set labels for {count} torrents",
+    "added_date": "Added Date"
   },
   "details": {
     "general": "General",
