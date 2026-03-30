@@ -39,11 +39,12 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { AddTorrentDialog } from "@/components/add-torrent-dialog"
-import { cn } from "@/lib/utils"
+import { cn, countTorrents } from "@/lib/utils"
 import { useLocation } from "react-router-dom"
 import { useI18n } from "@/lib/i18n-context"
 import { APP_CONFIG } from "@/lib/config"
 import { rpc } from "@/lib/rpc-client"
+import { useAppSettings } from "@/lib/app-settings-context"
 import type { Torrent } from "@/lib/rpc-types"
 
 const data = {
@@ -88,6 +89,7 @@ import { Link } from "react-router-dom"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation()
   const { t } = useI18n()
+  const { refreshInterval, autoRefresh } = useAppSettings()
   const [counts, setCounts] = useState({ all: 0, active: 0, downloading: 0, seeding: 0, paused: 0 })
 
   const getTitle = (title: string) => {
@@ -128,32 +130,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         if (!isMounted || !result?.torrents) return
 
         const torrents = result.torrents as Torrent[]
-        const all = torrents.length
-        let active = 0
-        let downloading = 0
-        let seeding = 0
-        let paused = 0
-
-        torrents.forEach((torrent: Torrent) => {
-          if (torrent.rateDownload > 0 || torrent.rateUpload > 0) active++
-          if ([1, 2, 3, 4].includes(torrent.status)) downloading++
-          if ([5, 6].includes(torrent.status)) seeding++
-          if (torrent.status === 0) paused++
-        })
-
-        setCounts({ all, active, downloading, seeding, paused })
+        setCounts(countTorrents(torrents))
       } catch (err) {
         console.error("Failed to load torrent counts:", err)
       }
     }
 
     fetchCounts()
-    const poll = setInterval(fetchCounts, 5000)
+    if (!autoRefresh) {
+      return () => { isMounted = false }
+    }
+
+    const poll = setInterval(fetchCounts, refreshInterval)
     return () => {
       isMounted = false
       clearInterval(poll)
     }
-  }, [])
+  }, [autoRefresh, refreshInterval])
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
