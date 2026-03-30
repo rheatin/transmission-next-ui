@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useEffect, useState } from "react"
 import {
   LayoutDashboard,
   Activity,
@@ -42,6 +43,8 @@ import { cn } from "@/lib/utils"
 import { useLocation } from "react-router-dom"
 import { useI18n } from "@/lib/i18n-context"
 import { APP_CONFIG } from "@/lib/config"
+import { rpc } from "@/lib/rpc-client"
+import type { Torrent } from "@/lib/rpc-types"
 
 const data = {
   navMain: [
@@ -85,6 +88,7 @@ import { Link } from "react-router-dom"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation()
   const { t } = useI18n()
+  const [counts, setCounts] = useState({ all: 0, active: 0, downloading: 0, seeding: 0, paused: 0 })
 
   const getTitle = (title: string) => {
     const keyMap: Record<string, string> = {
@@ -97,6 +101,59 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
     return t(keyMap[title] || title)
   }
+
+  const getCount = (title: string) => {
+    switch (title) {
+      case "All Torrents":
+        return counts.all
+      case "Active":
+        return counts.active
+      case "Downloading":
+        return counts.downloading
+      case "Seeding":
+        return counts.seeding
+      case "Paused":
+        return counts.paused
+      default:
+        return undefined
+    }
+  }
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchCounts = async () => {
+      try {
+        const result = await rpc.getTorrents(["id", "status", "rateDownload", "rateUpload"])
+        if (!isMounted || !result?.torrents) return
+
+        const torrents = result.torrents as Torrent[]
+        const all = torrents.length
+        let active = 0
+        let downloading = 0
+        let seeding = 0
+        let paused = 0
+
+        torrents.forEach((torrent: Torrent) => {
+          if (torrent.rateDownload > 0 || torrent.rateUpload > 0) active++
+          if ([1, 2, 3, 4].includes(torrent.status)) downloading++
+          if ([5, 6].includes(torrent.status)) seeding++
+          if (torrent.status === 0) paused++
+        })
+
+        setCounts({ all, active, downloading, seeding, paused })
+      } catch (err) {
+        console.error("Failed to load torrent counts:", err)
+      }
+    }
+
+    fetchCounts()
+    const poll = setInterval(fetchCounts, 5000)
+    return () => {
+      isMounted = false
+      clearInterval(poll)
+    }
+  }, [])
 
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
@@ -127,7 +184,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <Link to={item.url}>
                         <item.icon className={cn("transition-transform duration-300", isActive && "scale-110")} />
-                        <span className="font-semibold group-data-[collapsible=icon]:hidden">{getTitle(item.title)}</span>
+                        <span className="font-semibold group-data-[collapsible=icon]:hidden">
+                          {getTitle(item.title)}
+                          {typeof getCount(item.title) === "number" && (
+                            <span className="text-xs ml-1 text-muted-foreground">({getCount(item.title)})</span>
+                          )}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
