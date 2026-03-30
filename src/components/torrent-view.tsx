@@ -51,8 +51,8 @@ import {
   ChevronUp,
   History,
   Tag,
-  RefreshCw,
-  Wrench,
+  Megaphone,
+  PackageCheck,
   Search,
   MoreVertical,
   ChevronLeft,
@@ -175,7 +175,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
   const fetchData = useCallback(async () => {
     try {
       const torrentFields = [
-        "id", "name", "status", "totalSize", "percentDone",
+        "id", "name", "status", "totalSize", "percentDone", "recheckProgress",
         "rateDownload", "rateUpload", "eta", "error",
         "errorString", "downloadDir", "uploadedEver",
         "downloadedEver", "uploadRatio", "trackerStats", "labels"
@@ -205,7 +205,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
     }
   }, [showStats])
 
-  const handleBatchAction = async (action: "start" | "stop" | "remove") => {
+  const handleBatchAction = async (action: "start" | "stop" | "remove" | "reannounce" | "recheck") => {
     if (selectedIds.length === 0) return
 
     const count = selectedIds.length
@@ -224,6 +224,16 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
         setIdsToDelete(selectedIds)
         setIsDeleteDialogOpen(true)
         return // Handle in confirmDelete
+      } else if (action === "reannounce") {
+        await rpc.reannounceTorrents(selectedIds)
+        toast.success(t('common.reannounce_success', 'Reannounced'), {
+          description: t('common.reannounce_desc', 'Selected torrents reannounced to trackers')
+        })
+      } else if (action === "recheck") {
+        await rpc.verifyTorrents(selectedIds)
+        toast.success(t('common.recheck_success', 'Recheck Started'), {
+          description: t('common.recheck_desc', 'Selected torrents are being rechecked')
+        })
       }
 
       setSelectedIds([])
@@ -252,7 +262,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
     }
   }
 
-  const handleSingleAction = async (id: number, action: "start" | "stop" | "remove") => {
+  const handleSingleAction = async (id: number, action: "start" | "stop" | "remove" | "reannounce" | "recheck") => {
     try {
       if (action === "start") {
         await rpc.startTorrents([id])
@@ -264,6 +274,12 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
         setIdsToDelete([id])
         setIsDeleteDialogOpen(true)
         return // Handle in confirmDelete
+      } else if (action === "reannounce") {
+        await rpc.reannounceTorrents([id])
+        toast.success(t('common.reannounce_success', 'Reannounced'))
+      } else if (action === "recheck") {
+        await rpc.verifyTorrents([id])
+        toast.success(t('common.recheck_success', 'Recheck Started'))
       }
       fetchData()
     } catch (err) {
@@ -892,7 +908,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 px-2 md:px-3.5 rounded-lg font-medium bg-background/60 hover:bg-background hover:shadow-sm transition-all text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 border-none">
-                    <Wrench className="h-3.5 w-3.5" />
+                    <PackageCheck className="h-3.5 w-3.5" />
                     <span className="hidden md:inline">{t('common.tools')}</span>
                     <ChevronDown className="h-3 w-3 opacity-50 hidden md:inline" />
                   </Button>
@@ -902,7 +918,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                     className="rounded-xl py-2.5 px-3 focus:bg-muted cursor-pointer transition-colors"
                     onClick={() => setIsBatchReplaceOpen(true)}
                   >
-                    <RefreshCw className="h-4 w-4 mr-3 text-primary opacity-70" />
+                    <Megaphone className="h-4 w-4 mr-3 text-primary opacity-70" />
                     <span className="text-sm font-medium whitespace-nowrap">{t('common.batch_replace_tracker')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -1042,11 +1058,11 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                         <div className="w-full bg-muted rounded-full h-2 min-w-[100px]">
                           <div
                             className="bg-primary h-2 rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(var(--primary),0.5)]"
-                            style={{ width: `${torrent.percentDone * 100}%` }}
+                            style={{ width: `${(torrent.status === 2 ? (torrent.recheckProgress ?? torrent.percentDone) : torrent.percentDone) * 100}%` }}
                           ></div>
                         </div>
                         <span className="text-label mt-1.5 block">
-                          {(torrent.percentDone * 100).toFixed(1)}% • {formatSize(torrent.totalSize)}
+                          {((torrent.status === 2 ? (torrent.recheckProgress ?? torrent.percentDone) : torrent.percentDone) * 100).toFixed(1)}% • {formatSize(torrent.totalSize)}
                         </span>
                       </TableCell>
                       <TableCell className="text-numeric text-green-500 text-right">{formatSpeed(torrent.rateDownload)}</TableCell>
@@ -1075,6 +1091,12 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                           )}
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={() => handleSingleAction(torrent.id, "remove")}>
                             <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:bg-blue-500/10 hover:text-blue-500 transition-colors" onClick={() => handleSingleAction(torrent.id, "reannounce")}>
+                            <Megaphone className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-500 hover:bg-orange-500/10 hover:text-orange-500 transition-colors" onClick={() => handleSingleAction(torrent.id, "recheck")}>
+                            <PackageCheck className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -1135,12 +1157,12 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                   <div className="space-y-2">
                     <div className="flex justify-between text-label">
                       <span>{t('common.progress')}</span>
-                      <span className="text-primary">{(torrent.percentDone * 100).toFixed(1)}%</span>
+                      <span className="text-primary">{((torrent.status === 2 ? (torrent.recheckProgress ?? torrent.percentDone) : torrent.percentDone) * 100).toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-muted/50 rounded-full h-2.5 overflow-hidden">
                       <div
                         className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.4)]"
-                        style={{ width: `${torrent.percentDone * 100}%` }}
+                        style={{ width: `${(torrent.status === 2 ? (torrent.recheckProgress ?? torrent.percentDone) : torrent.percentDone) * 100}%` }}
                       ></div>
                     </div>
                   </div>
@@ -1195,6 +1217,12 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                         <Play className="h-3.5 w-3.5" />
                       </Button>
                     )}
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 hover:bg-blue-500/10 hover:text-blue-500 transition-all hover:scale-110" onClick={() => handleSingleAction(torrent.id, "reannounce")}>
+                      <Megaphone className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 hover:bg-orange-500/10 hover:text-orange-500 transition-all hover:scale-110" onClick={() => handleSingleAction(torrent.id, "recheck")}>
+                      <PackageCheck className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </CardFooter>
               </Card>
@@ -1310,6 +1338,14 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
               <Button size="sm" variant="ghost" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleBatchAction("remove")}>
                 <Trash2 className="h-4 w-4" />
                 <span className="hidden md:inline">{t('common.remove')}</span>
+              </Button>
+              <Button size="sm" variant="ghost" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4 text-blue-500 hover:bg-blue-500/10 hover:text-blue-500" onClick={() => handleBatchAction("reannounce")}>
+                <Megaphone className="h-4 w-4" />
+                <span className="hidden md:inline">{t('common.reannounce', 'Reannounce')}</span>
+              </Button>
+              <Button size="sm" variant="ghost" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4 text-orange-500 hover:bg-orange-500/10 hover:text-orange-500" onClick={() => handleBatchAction("recheck")}>
+                <PackageCheck className="h-4 w-4" />
+                <span className="hidden md:inline">{t('common.recheck', 'Recheck')}</span>
               </Button>
             </div>
 

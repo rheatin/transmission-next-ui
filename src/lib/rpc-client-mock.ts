@@ -92,6 +92,14 @@ class TransmissionRPCMock {
     return this.request("torrent-rename-path", { ids: [id], path, name });
   }
 
+  async reannounceTorrents(ids?: (number | string)[]) {
+    return this.request("torrent-reannounce", { ids });
+  }
+
+  async verifyTorrents(ids?: (number | string)[]) {
+    return this.request("torrent-verify", { ids });
+  }
+
   async freeSpace(path: string) {
     return this.request("free-space", { path });
   }

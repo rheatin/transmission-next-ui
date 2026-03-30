@@ -138,6 +138,16 @@ class TransmissionRPC {
     return this.request("torrent-rename-path", { ids: [id], path, name })
   }
 
+  async reannounceTorrents(ids?: (number | string)[]) {
+    const args = ids && ids.length > 0 ? { ids } : {}
+    return this.request("torrent-reannounce", args)
+  }
+
+  async verifyTorrents(ids?: (number | string)[]) {
+    const args = ids && ids.length > 0 ? { ids } : {}
+    return this.request("torrent-verify", args)
+  }
+
   async freeSpace(path: string) {
     return this.request("free-space", { path })
   }

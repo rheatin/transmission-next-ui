@@ -62,7 +62,7 @@ function TorrentDetailsContent() {
       const id = isNaN(Number(idValue)) ? idValue : Number(idValue)
 
       const torrentsData = await rpc.getTorrents([
-        "id", "name", "status", "totalSize", "percentDone",
+        "id", "name", "status", "totalSize", "percentDone", "recheckProgress",
         "rateDownload", "rateUpload", "eta", "addedDate",
         "hashString", "downloadDir", "comment", "isPrivate",
         "creator", "dateCreated", "uploadedEver", "downloadedEver",
@@ -200,11 +200,11 @@ function TorrentDetailsContent() {
             </CardHeader>
             <CardContent className="py-4 md:py-6 flex flex-col gap-2 px-4">
               <div className="flex justify-between items-baseline">
-                <span className="text-2xl md:text-3xl font-medium text-primary">{(tor.percentDone * 100).toFixed(1)}%</span>
+                <span className="text-2xl md:text-3xl font-medium text-primary">{((tor.status === 2 ? (tor.recheckProgress ?? tor.percentDone) : tor.percentDone) * 100).toFixed(1)}%</span>
                 <span className="text-[10px] md:text-xs font-medium text-muted-foreground">{formatSize(tor.downloadedEver)} / {formatSize(tor.totalSize)}</span>
               </div>
               <div className="w-full bg-muted rounded-full h-1.5 md:h-2 overflow-hidden">
-                <div className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.5)]" style={{ width: `${tor.percentDone * 100}%` }}></div>
+                <div className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.5)]" style={{ width: `${(tor.status === 2 ? (tor.recheckProgress ?? tor.percentDone) : tor.percentDone) * 100}%` }}></div>
               </div>
             </CardContent>
           </Card>
