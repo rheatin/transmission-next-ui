@@ -58,7 +58,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  ShieldCheck,
+  Radio
 } from "lucide-react"
 import { AddTorrentDialog } from "@/components/add-torrent-dialog"
 import { EditTorrentDialog } from "@/components/edit-torrent-dialog"
@@ -1329,21 +1331,21 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
               <div className="bg-primary text-primary-foreground text-[10px] md:text-xs font-bold h-5 w-5 md:h-6 md:w-6 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
                 {selectedIds.length}
               </div>
-              <span className="text-sm font-bold tracking-tight hidden sm:inline">{t('common.selected')}</span>
+              <span className="text-sm font-bold tracking-tight hidden lg:inline">{t('common.selected')}</span>
             </div>
 
-            <div className="flex items-center gap-1.5 md:gap-3 flex-1 min-w-0 overflow-x-auto no-scrollbar justify-center md:justify-start">
-              <Button size="sm" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4" onClick={() => handleBatchAction("start")}>
+            <div className="flex items-center gap-1.5 xl:gap-3 flex-1 min-w-0 overflow-x-auto no-scrollbar justify-center md:justify-start">
+              <Button size="sm" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-1.5 md:gap-2 px-2.5 md:px-4" onClick={() => handleBatchAction("start")}>
                 <Play className="h-4 w-4" />
-                <span className="hidden md:inline">{t('common.resume')}</span>
+                <span className="hidden xl:inline">{t('common.resume')}</span>
               </Button>
-              <Button size="sm" variant="secondary" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4" onClick={() => handleBatchAction("stop")}>
+              <Button size="sm" variant="secondary" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-1.5 md:gap-2 px-2.5 md:px-4" onClick={() => handleBatchAction("stop")}>
                 <Pause className="h-4 w-4" />
-                <span className="hidden md:inline">{t('common.pause')}</span>
+                <span className="hidden xl:inline">{t('common.pause')}</span>
               </Button>
-              <Button size="sm" variant="ghost" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleBatchAction("remove")}>
+              <Button size="sm" variant="ghost" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-1.5 md:gap-2 px-2.5 md:px-4 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleBatchAction("remove")}>
                 <Trash2 className="h-4 w-4" />
-                <span className="hidden md:inline">{t('common.remove')}</span>
+                <span className="hidden xl:inline">{t('common.remove')}</span>
               </Button>
               <Button size="sm" variant="ghost" className="h-9 md:h-10 rounded-2xl md:rounded-xl font-bold gap-2 px-3 md:px-4 text-blue-500 hover:bg-blue-500/10 hover:text-blue-500" onClick={() => handleBatchAction("reannounce")}>
                 <Megaphone className="h-4 w-4" />
