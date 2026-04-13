@@ -115,6 +115,38 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
   const [trackerFilter, setTrackerFilter] = useState<string[]>([])
   const [dirFilter, setDirFilter] = useState<string[]>([])
   const [labelFilter, setLabelFilter] = useState<string[]>([])
+
+  const defaultVisibleColumns: Record<string, boolean> = {
+    tracker: false,
+    addedDate: false,
+    totalSize: false,
+    downloadedEver: false,
+    uploadedEver: false,
+    uploadRatio: false,
+    doneDate: false,
+    queuePosition: false,
+    rateDownload: true,
+    rateUpload: true,
+    eta: true,
+  }
+
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
+    const saved = localStorage.getItem('torrent-visible-columns')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        return { ...defaultVisibleColumns, ...parsed }
+      } catch {
+        // ignore
+      }
+    }
+    return defaultVisibleColumns
+  })
+
+  const resetVisibleColumns = () => {
+    setVisibleColumns(defaultVisibleColumns)
+    localStorage.setItem('torrent-visible-columns', JSON.stringify(defaultVisibleColumns))
+  }
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isBatchReplaceOpen, setIsBatchReplaceOpen] = useState(false)
   const [idsToDelete, setIdsToDelete] = useState<number[]>([])
@@ -152,6 +184,10 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
   }
 
   const [isStatsCollapsed, setIsStatsCollapsed] = useState(false)
+
+  useEffect(() => {
+    localStorage.setItem('torrent-visible-columns', JSON.stringify(visibleColumns))
+  }, [visibleColumns])
 
   const trackers = useMemo(() => {
     const hosts = new Set<string>()
@@ -201,7 +237,8 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
         "id", "name", "status", "totalSize", "percentDone", "recheckProgress",
         "rateDownload", "rateUpload", "eta", "error",
         "errorString", "downloadDir", "uploadedEver",
-        "downloadedEver", "uploadRatio", "trackerStats", "labels", "addedDate"
+        "downloadedEver", "uploadRatio", "trackerStats", "labels", "addedDate",
+        "doneDate", "queuePosition", "peersConnected", "isPrivate"
       ]
 
       const torrentsData = await rpc.getTorrents(torrentFields)
@@ -403,8 +440,15 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
       if (!sortConfig) return 0;
       const { key, direction } = sortConfig;
 
-      let valA = a[key];
-      let valB = b[key];
+      const getSortValue = (torrent: any) => {
+        if (key === 'xtracker') {
+          return torrent.trackerStats?.[0]?.host || ''
+        }
+        return torrent[key]
+      }
+
+      let valA = getSortValue(a);
+      let valB = getSortValue(b);
 
       if (valA < valB) return direction === 'asc' ? -1 : 1;
       if (valA > valB) return direction === 'asc' ? 1 : -1;
@@ -931,6 +975,54 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
               </DropdownMenu>
             </div>
             <div className="flex items-center bg-muted/60 p-1 rounded-xl shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 px-2 md:px-3.5 rounded-lg font-medium bg-background/60 hover:bg-background hover:shadow-sm transition-all text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 border-none">
+                    <Tag className="h-3.5 w-3.5" />
+                    <span className="hidden md:inline">{t('common.columns')}</span>
+                    <ChevronDown className="h-3 w-3 opacity-50 hidden md:inline" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-auto min-w-[200px] rounded-2xl border border-muted/50 bg-card/95 backdrop-blur-xl shadow-2xl p-1 mt-2 overflow-hidden">
+                  <div className="px-2 py-1 text-xs text-muted-foreground font-medium">
+                    {t('common.column_preferences')}
+                  </div>
+                  <DropdownMenuSeparator className="mx-1" />
+                  {[
+                    { key: 'tracker', label: t('common.tracker') },
+                    { key: 'addedDate', label: t('common.added_date') },
+                    { key: 'totalSize', label: t('common.size') },
+                    { key: 'downloadedEver', label: t('common.downloaded') },
+                    { key: 'uploadedEver', label: t('common.uploaded') },
+                    { key: 'uploadRatio', label: t('common.ratio') },
+                    { key: 'doneDate', label: t('common.done_date') },
+                    { key: 'queuePosition', label: t('common.queue') },
+                    { key: 'rateDownload', label: t('common.down_speed') },
+                    { key: 'rateUpload', label: t('common.up_speed') },
+                    { key: 'eta', label: t('common.eta') },
+                  ].map(col => (
+                    <DropdownMenuCheckboxItem
+                      key={col.key}
+                      className="rounded-xl py-2 pl-10 pr-3 focus:bg-muted cursor-pointer transition-colors"
+                      checked={visibleColumns[col.key]}
+                      onCheckedChange={() => setVisibleColumns(prev => ({ ...prev, [col.key]: !prev[col.key] }))}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      {col.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                  <DropdownMenuSeparator className="mx-1" />
+                  <DropdownMenuItem
+                    className="rounded-xl py-2 px-3 focus:bg-muted cursor-pointer transition-colors"
+                    onClick={resetVisibleColumns}
+                  >
+                    <span className="text-sm font-medium text-destructive">{t('common.reset_columns')}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="flex items-center bg-muted/60 p-1 rounded-xl shrink-0">
               <AddTorrentDialog onSuccess={fetchData}>
                 <Button variant="default" className="h-8 px-2 md:px-4 rounded-lg font-medium gap-2 shadow-md shadow-primary/10 text-xs border-none">
                   <Plus className="h-3.5 w-3.5" />
@@ -961,11 +1053,11 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
 
         {viewMode === "list" ? (
           <Card className="shadow-md border-none overflow-hidden py-0">
-            <CardContent className="p-0 overflow-auto">
-              <Table className="table-fixed min-w-[1000px]">
+            <CardContent className="p-0 overflow-x-auto">
+              <Table className="table-fixed min-w-[2200px]">
                 <TableHeader className="bg-muted/50">
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="w-[50px] pl-6 h-12">
+                    <TableHead className="w-[50px] pl-6 h-12 sticky left-0 z-30 bg-transparent border-r border-muted/20 rounded-none rounded-tl-none outline-none">
                       <div
                         className="cursor-pointer text-muted-foreground hover:text-primary transition-colors"
                         onClick={toggleSelectAll}
@@ -982,13 +1074,13 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                       </div>
                     </TableHead>
                     <TableHead
-                      className="w-[30%] h-12 cursor-pointer hover:text-primary transition-colors"
+                      className="w-[15%] h-12 cursor-pointer hover:text-primary transition-colors"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center truncate pr-4">{t('common.name')} <SortIcon column="name" /></div>
                     </TableHead>
                     <TableHead
-                      className="w-[160px] h-12 cursor-pointer hover:text-primary transition-colors"
+                      className="w-[100px] h-12 cursor-pointer hover:text-primary transition-colors"
                       onClick={() => handleSort('status')}
                     >
                       <div className="flex items-center">{t('common.status')} <SortIcon column="status" /></div>
@@ -999,31 +1091,97 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                     >
                       <div className="flex items-center">{t('common.progress')} <SortIcon column="progress" /></div>
                     </TableHead>
-                    <TableHead
-                      className="w-[110px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
-                      onClick={() => handleSort('rateDownload')}
-                    >
-                      <div className="flex items-center justify-end">{t('common.down_speed')} <SortIcon column="rateDownload" /></div>
-                    </TableHead>
-                    <TableHead
-                      className="w-[110px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
-                      onClick={() => handleSort('rateUpload')}
-                    >
-                      <div className="flex items-center justify-end">{t('common.up_speed')} <SortIcon column="rateUpload" /></div>
-                    </TableHead>
-                    <TableHead
-                      className="w-[100px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
-                      onClick={() => handleSort('eta')}
-                    >
-                      <div className="flex items-center justify-end">{t('common.eta')} <SortIcon column="eta" /></div>
-                    </TableHead>
-                    <TableHead
-                      className="w-[130px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
-                      onClick={() => handleSort('addedDate')}
-                    >
-                      <div className="flex items-center justify-end">{t('common.added_date')} <SortIcon column="addedDate" /></div>
-                    </TableHead>
-                    <TableHead className="text-center w-[130px] h-12 pr-6">{t('common.actions')}</TableHead>
+                    {visibleColumns.rateDownload && (
+                      <TableHead
+                        className="w-[110px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('rateDownload')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.down_speed')} <SortIcon column="rateDownload" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.rateUpload && (
+                      <TableHead
+                        className="w-[110px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('rateUpload')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.up_speed')} <SortIcon column="rateUpload" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.eta && (
+                      <TableHead
+                        className="w-[100px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('eta')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.eta')} <SortIcon column="eta" /></div>
+                      </TableHead>
+                    )}
+
+                    {visibleColumns.addedDate && (
+                      <TableHead
+                        className="w-[130px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('addedDate')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.added_date')} <SortIcon column="addedDate" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.totalSize && (
+                      <TableHead
+                        className="w-[120px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('totalSize')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.size')} <SortIcon column="totalSize" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.downloadedEver && (
+                      <TableHead
+                        className="w-[120px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('downloadedEver')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.downloaded')} <SortIcon column="downloadedEver" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.uploadedEver && (
+                      <TableHead
+                        className="w-[120px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('uploadedEver')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.uploaded')} <SortIcon column="uploadedEver" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.uploadRatio && (
+                      <TableHead
+                        className="w-[100px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('uploadRatio')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.ratio')} <SortIcon column="uploadRatio" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.doneDate && (
+                      <TableHead
+                        className="w-[130px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('doneDate')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.done_date')} <SortIcon column="doneDate" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.queuePosition && (
+                      <TableHead
+                        className="w-[80px] h-12 cursor-pointer hover:text-primary transition-colors text-center"
+                        onClick={() => handleSort('queuePosition')}
+                      >
+                        <div className="flex items-center justify-center">{t('common.queue')} <SortIcon column="queuePosition" /></div>
+                      </TableHead>
+                    )}
+                    {visibleColumns.tracker && (
+                      <TableHead
+                        className="w-[140px] h-12 cursor-pointer hover:text-primary transition-colors text-right"
+                        onClick={() => handleSort('xtracker')}
+                      >
+                        <div className="flex items-center justify-end">{t('common.tracker')} <SortIcon column="xtracker" /></div>
+                      </TableHead>
+                    )}
+
+                    <TableHead className="text-center w-[130px] h-12 pr-6 sticky right-0 bg-background/95 border-l border-muted/50 z-10 rounded-none rounded-tr-none">{t('common.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1031,11 +1189,11 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                     <TableRow
                       key={torrent.id}
                       className={cn(
-                        "hover:bg-muted/30 transition-colors border-b last:border-0 border-muted/50 group/row",
+                        "hover:bg-muted/30 transition-colors border-b last:border-0 border-muted/50 group/row relative",
                         selectedIds.includes(torrent.id) && "bg-primary/5 hover:bg-primary/10"
                       )}
                     >
-                      <TableCell className="pl-6">
+                      <TableCell className="pl-6 sticky left-0 z-30 bg-transparent border-r border-muted/20 rounded-none rounded-l-none">
                         <div
                           className="cursor-pointer text-muted-foreground hover:text-primary transition-colors"
                           onClick={() => toggleSelect(torrent.id)}
@@ -1078,16 +1236,55 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                           {((torrent.status === 2 ? (torrent.recheckProgress ?? torrent.percentDone) : torrent.percentDone) * 100).toFixed(1)}% • {formatSize(torrent.totalSize)}
                         </span>
                       </TableCell>
-                      <TableCell className="text-numeric text-green-500 text-right">{formatSpeed(torrent.rateDownload)}</TableCell>
-                      <TableCell className="text-numeric text-blue-500 text-right">{formatSpeed(torrent.rateUpload)}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5 text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span className="text-label lowercase">{formatDuration(torrent.eta)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">{torrent.addedDate ? new Date(torrent.addedDate * 1000).toLocaleString() : t('common.unknown', 'Unknown')}</TableCell>
-                      <TableCell className="w-[130px] pr-6">
+                      {visibleColumns.rateDownload && (
+                        <TableCell className="text-numeric text-green-500 text-right">{formatSpeed(torrent.rateDownload)}</TableCell>
+                      )}
+                      {visibleColumns.rateUpload && (
+                        <TableCell className="text-numeric text-blue-500 text-right">{formatSpeed(torrent.rateUpload)}</TableCell>
+                      )}
+                      {visibleColumns.eta && (
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1.5 text-muted-foreground">
+                            <Clock className="h-3.5 w-3.5" />
+                            <span className="text-label lowercase">{formatDuration(torrent.eta)}</span>
+                          </div>
+                        </TableCell>
+                      )}
+                      {visibleColumns.addedDate && (
+                        <TableCell className="text-right">{torrent.addedDate ? new Date(torrent.addedDate * 1000).toLocaleString() : t('common.unknown', 'Unknown')}</TableCell>
+                      )}
+                      {visibleColumns.totalSize && (
+                        <TableCell className="text-right">{formatSize(torrent.totalSize)}</TableCell>
+                      )}
+                      {visibleColumns.downloadedEver && (
+                        <TableCell className="text-right">{formatSize(torrent.downloadedEver)}</TableCell>
+                      )}
+                      {visibleColumns.uploadedEver && (
+                        <TableCell className="text-right">{formatSize(torrent.uploadedEver)}</TableCell>
+                      )}
+                      {visibleColumns.uploadRatio && (
+                        <TableCell className="text-right">{torrent.uploadRatio?.toFixed(2) || '0.00'}</TableCell>
+                      )}
+                      {visibleColumns.doneDate && (
+                        <TableCell className="text-right">{torrent.doneDate ? new Date(torrent.doneDate * 1000).toLocaleString() : '-'}</TableCell>
+                      )}
+                      {visibleColumns.queuePosition && (
+                        <TableCell className="text-center">{torrent.queuePosition}</TableCell>
+                      )}
+                      {visibleColumns.tracker && (
+                        <TableCell
+                          className="text-truncate max-w-[140px] text-muted-foreground text-right"
+                          title={torrent.trackerStats?.map(ts => ts.host).filter(Boolean).join(', ') || t('common.unknown', 'Unknown')}
+                        >
+                          {(() => {
+                            const hosts = torrent.trackerStats?.map(ts => ts.host).filter(Boolean) ?? []
+                            if (!hosts.length) return t('common.unknown', 'Unknown')
+                            if (hosts.length <= 2) return hosts.join(', ')
+                            return `${hosts[0]} (+${hosts.length - 1})`
+                          })()}
+                        </TableCell>
+                      )}
+                      <TableCell className="w-[130px] pr-6 sticky right-0 bg-background/95 border-l border-muted/50 rounded-none rounded-r-none">
                         <div className="flex items-center justify-center gap-1">
                           <EditTorrentDialog torrent={torrent}>
                             <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-colors">
