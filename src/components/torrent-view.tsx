@@ -60,11 +60,13 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ShieldCheck,
-  Radio
+  Radio,
+  FolderOpen
 } from "lucide-react"
 import { AddTorrentDialog } from "@/components/add-torrent-dialog"
 import { EditTorrentDialog } from "@/components/edit-torrent-dialog"
 import { BatchReplaceTrackerDialog } from "@/components/batch-replace-tracker-dialog"
+import { BatchMoveDirectoryDialog } from "@/components/batch-move-directory-dialog"
 import { cn, filterTorrentByStatus } from "@/lib/utils"
 import { toast } from "sonner"
 import { RemoveTorrentDialog } from "@/components/remove-torrent-dialog"
@@ -149,6 +151,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
   }
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isBatchReplaceOpen, setIsBatchReplaceOpen] = useState(false)
+  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false)
   const [idsToDelete, setIdsToDelete] = useState<number[]>([])
   const [clickedCard, setClickedCard] = useState<string | null>(null)
   const [pageSize, setPageSize] = useState<number>(() => {
@@ -971,6 +974,13 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                     <Megaphone className="h-4 w-4 mr-3 text-primary opacity-70" />
                     <span className="text-sm font-medium whitespace-nowrap">{t('common.batch_replace_tracker')}</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="rounded-xl py-2.5 px-3 focus:bg-muted cursor-pointer transition-colors"
+                    onClick={() => setIsBatchMoveOpen(true)}
+                  >
+                    <FolderOpen className="h-4 w-4 mr-3 text-primary opacity-70" />
+                    <span className="text-sm font-medium whitespace-nowrap">{t('common.batch_move_directory')}</span>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -1576,6 +1586,12 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
       <BatchReplaceTrackerDialog
         open={isBatchReplaceOpen}
         onOpenChange={setIsBatchReplaceOpen}
+        onSuccess={fetchData}
+      />
+
+      <BatchMoveDirectoryDialog
+        open={isBatchMoveOpen}
+        onOpenChange={setIsBatchMoveOpen}
         onSuccess={fetchData}
       />
     </div>
