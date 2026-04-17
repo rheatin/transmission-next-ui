@@ -130,6 +130,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
     rateDownload: true,
     rateUpload: true,
     eta: true,
+    labels: false,
   }
 
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(() => {
@@ -1010,6 +1011,7 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                     { key: 'rateDownload', label: t('common.down_speed') },
                     { key: 'rateUpload', label: t('common.up_speed') },
                     { key: 'eta', label: t('common.eta') },
+                    { key: 'labels', label: t('common.labels') },
                   ].map(col => (
                     <DropdownMenuCheckboxItem
                       key={col.key}
@@ -1190,6 +1192,13 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                         <div className="flex items-center justify-end">{t('common.tracker')} <SortIcon column="xtracker" /></div>
                       </TableHead>
                     )}
+                    {visibleColumns.labels && (
+                      <TableHead
+                        className="w-[150px] h-12 cursor-pointer hover:text-primary transition-colors"
+                      >
+                        <div className="flex items-center">{t('common.labels')}</div>
+                      </TableHead>
+                    )}
 
                     <TableHead className="text-center w-[130px] h-12 pr-6 sticky right-0 bg-background/95 border-l border-muted/50 z-10 rounded-none rounded-tr-none">{t('common.actions')}</TableHead>
                   </TableRow>
@@ -1292,6 +1301,30 @@ export function TorrentView({ title, statusFilter, showStats = true }: TorrentVi
                             if (hosts.length <= 2) return hosts.join(', ')
                             return `${hosts[0]} (+${hosts.length - 1})`
                           })()}
+                        </TableCell>
+                      )}
+                      {visibleColumns.labels && (
+                        <TableCell className="text-truncate max-w-[150px]">
+                          {torrent.labels && torrent.labels.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {torrent.labels.map((label: string, i: number) => {
+                                let text = label;
+                                try {
+                                  const parsed = JSON.parse(label);
+                                  text = typeof parsed === 'object' && parsed !== null && 'text' in parsed ? parsed.text : label;
+                                } catch (e) {
+                                  // keep original text
+                                }
+                                return (
+                                  <span key={i} className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground">
+                                    {text}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
                         </TableCell>
                       )}
                       <TableCell className="w-[130px] pr-6 sticky right-0 bg-background/95 border-l border-muted/50 rounded-none rounded-r-none">
