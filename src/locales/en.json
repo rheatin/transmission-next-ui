@@ -89,6 +89,7 @@
     "recheck": "Recheck",
     "recheck_success": "Recheck Started",
     "added_date": "Added Date",
+    "edit_date": "Modified Date",
     "size": "Size",
     "downloaded": "Downloaded",
     "uploaded": "Uploaded",

@@ -49,10 +49,19 @@ export function formatSizeParts(bytes: number): { value: string, unit: string } 
   }
 }
 
-export function splitSpeed(speedStr: string): { value: string, unit: string } {
-  const parts = speedStr.split(" ")
-  if (parts.length === 2) {
-    return { value: parts[0], unit: parts[1] }
-  }
-  return { value: speedStr, unit: "" }
+export function splitSpeed(speed: string): { value: string, unit: string } {
+  const match = speed.match(/^([\d.]+)\s*(B|KB|MB|GB|TB|PB)\/s$/)
+  if (!match) return { value: "0", unit: "B/s" }
+  return { value: match[1], unit: match[2] + "/s" }
+}
+
+export function formatDate(timestamp: number, locale: string = 'en'): string {
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }

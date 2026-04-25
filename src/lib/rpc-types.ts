@@ -25,6 +25,7 @@ export interface Torrent {
   rateUpload: number
   eta: number
   addedDate: number
+  editDate: number
   doneDate: number
   downloadDir: string
   error: number
@@ -159,4 +160,22 @@ export interface SessionStats {
     sessionCount: number
     secondsActive: number
   }
+}
+
+export type TorrentField = keyof Torrent
+
+export interface TorrentSetArgs {
+  bandwidthPriority?: number
+  downloadLimit?: number
+  downloadLimited?: boolean
+  uploadLimit?: number
+  uploadLimited?: boolean
+  honorsSessionLimits?: boolean
+  seedRatioLimit?: number
+  seedRatioMode?: number
+  seedIdleLimit?: number
+  seedIdleMode?: number
+  labels?: string[]
+  location?: string
+  trackerList?: string
 }
