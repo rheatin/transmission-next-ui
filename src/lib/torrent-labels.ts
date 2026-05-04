@@ -9,9 +9,9 @@ export function parseTorrentLabel(rawLabel: string): string {
       typeof parsed === "object" &&
       parsed !== null &&
       "text" in parsed &&
-      typeof (parsed as Record<string, unknown>).text === "string"
+      typeof parsed.text === "string"
     ) {
-      return (parsed as Record<string, string>).text
+      return parsed.text
     }
   } catch {
     // Fall back to the raw label when it is not JSON.

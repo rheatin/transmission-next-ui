@@ -27,6 +27,7 @@ export interface Torrent {
   addedDate: number
   editDate: number
   doneDate: number
+  editDate?: number
   downloadDir: string
   error: number
   errorString: string
@@ -59,6 +60,46 @@ export interface Torrent {
   seedIdleLimit?: number
   seedIdleMode?: number
   trackerList?: string
+}
+
+export type TorrentId = number | string
+export type TorrentField = keyof Torrent
+
+export interface TorrentGetResponse {
+  torrents: Torrent[]
+}
+
+export interface TorrentAddArgs {
+  filename?: string
+  metainfo?: string
+  "download-dir"?: string
+  paused?: boolean
+}
+
+export interface TorrentAddResponse {
+  "torrent-added"?: Torrent
+  "torrent-duplicate"?: Torrent
+}
+
+export interface TorrentSetArgs {
+  bandwidthPriority?: number
+  downloadLimit?: number
+  downloadLimited?: boolean
+  uploadLimit?: number
+  uploadLimited?: boolean
+  honorsSessionLimits?: boolean
+  seedRatioLimit?: number
+  seedRatioMode?: number
+  seedIdleLimit?: number
+  seedIdleMode?: number
+  trackerList?: string
+  labels?: string[]
+}
+
+export interface FreeSpaceResponse {
+  path: string
+  "size-bytes": number
+  total_size: number
 }
 
 export interface Tracker {

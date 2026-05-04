@@ -24,12 +24,14 @@ import {
   ChevronsRight,
   ShieldCheck,
   Radio,
+  Tag,
 } from "lucide-react"
-import { BatchReplaceTrackerDialog } from "@/components/batch-replace-tracker-dialog"
-import { BatchMoveDirectoryDialog } from "@/components/batch-move-directory-dialog"
+import { BatchReplaceTrackerDialog } from "@/components/torrents/batch-replace-tracker-dialog"
+import { BatchMoveDirectoryDialog } from "@/components/torrents/batch-move-directory-dialog"
+import { BatchSetLabelsSelectedDialog } from "@/components/torrents/batch-set-labels-selected-dialog"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { RemoveTorrentDialog } from "@/components/remove-torrent-dialog"
+import { RemoveTorrentDialog } from "@/components/torrents/remove-torrent-dialog"
 
 import { useI18n } from "@/lib/i18n-context"
 import { useSearch } from "@/lib/search-context"
@@ -39,9 +41,9 @@ import { useTorrentData } from "@/hooks/use-torrent-data"
 import { useTorrentFilters } from "@/hooks/use-torrent-filters"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useColumnManager } from "@/hooks/use-column-manager"
-import { TorrentListView } from "@/components/torrent-list-view"
-import { TorrentGridView } from "@/components/torrent-grid-view"
-import { TorrentToolbar } from "@/components/torrent-toolbar"
+import { TorrentListView } from "@/components/torrents/torrent-list-view"
+import { TorrentGridView } from "@/components/torrents/torrent-grid-view"
+import { TorrentToolbar } from "@/components/torrents/torrent-toolbar"
 import {
   createTorrentActionPlan,
   type BatchTorrentAction,
@@ -127,6 +129,7 @@ export function TorrentView({ statusFilter, showStats = true }: TorrentViewProps
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isBatchReplaceOpen, setIsBatchReplaceOpen] = useState(false)
   const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false)
+  const [isBatchSetLabelsOpen, setIsBatchSetLabelsOpen] = useState(false)
   const [idsToDelete, setIdsToDelete] = useState<number[]>([])
   const [clickedCard, setClickedCard] = useState<string | null>(null)
   const [pageSize, setPageSize] = useState<number>(() => {
@@ -532,6 +535,13 @@ export function TorrentView({ statusFilter, showStats = true }: TorrentViewProps
                     <Radio className="h-4 w-4 opacity-60" />
                     {t('common.reannounce', 'Reannounce')}
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="rounded-xl py-2.5 px-3 cursor-pointer gap-3 font-medium focus:bg-muted"
+                    onClick={() => setIsBatchSetLabelsOpen(true)}
+                  >
+                    <Tag className="h-4 w-4 opacity-60" />
+                    {t('common.set_torrent_labels')}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -564,6 +574,13 @@ export function TorrentView({ statusFilter, showStats = true }: TorrentViewProps
       <BatchMoveDirectoryDialog
         open={isBatchMoveOpen}
         onOpenChange={setIsBatchMoveOpen}
+        onSuccess={fetchData}
+      />
+
+      <BatchSetLabelsSelectedDialog
+        open={isBatchSetLabelsOpen}
+        onOpenChange={setIsBatchSetLabelsOpen}
+        selectedIds={selectedIds}
         onSuccess={fetchData}
       />
     </div>

@@ -20,7 +20,7 @@ import {
   EditTorrentRatioTab,
   EditTorrentSpeedTab,
   EditTorrentTrackersTab,
-} from "@/components/edit-torrent-advanced-tabs"
+} from "@/components/torrents/edit-torrent-advanced-tabs"
 import type { EditTorrentDialogTorrent } from "@/lib/edit-torrent-form"
 import { useEditTorrentForm } from "@/hooks/use-edit-torrent-form"
 

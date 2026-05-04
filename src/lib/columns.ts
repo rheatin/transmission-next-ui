@@ -1,3 +1,4 @@
+
 export interface ColumnConfig {
   id: string
   labelKey: string
@@ -89,22 +90,6 @@ export const TORRENT_COLUMNS: ColumnConfig[] = [
     width: "100px",
     rpcFields: ["eta"],
     align: "right"
-  },
-  {
-    id: "tracker",
-    labelKey: "common.tracker",
-    defaultLabel: "Tracker",
-    width: "200px",
-    rpcFields: ["trackerStats"],
-    align: "left"
-  },
-  {
-    id: "labels",
-    labelKey: "common.labels",
-    defaultLabel: "Labels",
-    width: "150px",
-    rpcFields: ["labels"],
-    align: "left"
   }
 ]
 
@@ -114,9 +99,7 @@ export const DEFAULT_VISIBLE_COLUMNS = [
   "progress",
   "uploadedEver",
   "rateDownload",
-  "eta",
-  "tracker",
-  "labels"
+  "eta"
 ]
 
 export const BASE_RPC_FIELDS = [

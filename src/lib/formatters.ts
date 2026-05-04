@@ -65,3 +65,25 @@ export function formatDate(timestamp: number, locale: string = 'en'): string {
     minute: '2-digit'
   })
 }
+export function formatDate(timestamp: number, locale?: string): string {
+  if (!timestamp || timestamp <= 0) return "-"
+  const date = new Date(timestamp * 1000)
+  
+  if (locale === 'zh') {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day} ${hours}:${minutes}`
+  }
+
+  return date.toLocaleString(locale || undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+}

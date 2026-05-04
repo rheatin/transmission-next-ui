@@ -18,23 +18,7 @@ export function useColumnManager() {
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
     const saved = localStorage.getItem('torrent-visible-columns')
-    if (!saved) return DEFAULT_VISIBLE_COLUMNS
-
-    try {
-      const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed)) {
-        return normalizeVisibleColumns(parsed)
-      }
-      if (typeof parsed === 'object' && parsed !== null) {
-        return normalizeVisibleColumns(Object.entries(parsed)
-          .filter(([, value]) => value)
-          .map(([key]) => key))
-      }
-    } catch {
-      // ignore invalid storage data
-    }
-
-    return DEFAULT_VISIBLE_COLUMNS
+    return saved ? normalizeVisibleColumns(JSON.parse(saved) as string[]) : DEFAULT_VISIBLE_COLUMNS
   })
 
   const columnDnDSensors = useSensors(
@@ -48,11 +32,10 @@ export function useColumnManager() {
 
   const toggleColumn = (id: string) => {
     if (id === "name") return
-
-    setVisibleColumns((prev) => {
+    setVisibleColumns(prev => {
       if (prev.includes(id)) {
         if (prev.length <= 1) return prev
-        return normalizeVisibleColumns(prev.filter((c) => c !== id))
+        return normalizeVisibleColumns(prev.filter(c => c !== id))
       }
       return normalizeVisibleColumns([...prev, id])
     })
@@ -73,8 +56,8 @@ export function useColumnManager() {
     })
   }
 
-  const allColumns = useMemo<LabeledColumnConfig[]>(
-    () => TORRENT_COLUMNS.map(col => ({ ...col, label: t(col.labelKey, col.defaultLabel) })),
+  const allColumns = useMemo<LabeledColumnConfig[]>(() =>
+    TORRENT_COLUMNS.map(col => ({ ...col, label: t(col.labelKey, col.defaultLabel) })),
     [t]
   )
 

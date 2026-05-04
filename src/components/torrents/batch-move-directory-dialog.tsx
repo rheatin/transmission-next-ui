@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { FolderOpen, ArrowRight, Search, AlertCircle, RefreshCw, ListCheck } from "lucide-react"
-import { BatchTorrentList } from "@/components/batch-torrent-list"
+import { BatchTorrentList } from "@/components/torrents/batch-torrent-list"
 import { BatchInputWithDropdown } from "@/components/batch-input-with-dropdown"
 import {
   Dialog,

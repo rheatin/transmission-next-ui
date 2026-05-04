@@ -37,6 +37,8 @@ English | [简体中文](README.md)
 - [x] Tracker Filter
 - [x] Torrent Label Support
 - [x] Batch Replace Trackers
+- [x] Batch Move Download Directory
+- [x] Batch Set Torrent Labels
 
 ⚠️**Notice**: This is an early version of the project. It has not been fully tested yet. Please verify its functionality before using it in production.
 
@@ -78,7 +80,14 @@ docker-compose up -d   # start in background
 docker-compose down    # stop and remove the container
 ```
 
-By default, the container runs using `network_mode: host` for better connectivity, which is ideal for Linux environments. If you are on **macOS**, `host` mode is not supported — you will need to manually switch to **port mapping** (e.g., `9091:9091`) in the `docker-compose.yml` file. You can adjust this behavior in the `docker-compose.yml` according to your network setup.
+The following ports are mapped by default:
+
+| Port | Protocol | Purpose |
+| --- | --- | --- |
+| `9091` | TCP | Web UI and RPC interface — access the Web UI at `http://localhost:9091` |
+| `51413` | TCP/UDP | BitTorrent data transfer — used for peer connections; keeping this port open improves download performance |
+
+If you have modified the port settings in Transmission's configuration file located in the `config` directory, please ensure that you also update the corresponding port mappings in the `docker-compose.yml` file to reflect those changes.
 
 ### 2. Manual Install
 
