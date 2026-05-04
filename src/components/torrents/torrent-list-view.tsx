@@ -21,20 +21,8 @@ import { cn } from "@/lib/utils"
 import { formatSpeed, formatDuration, formatSize, getStatusLabel, formatDate } from "@/lib/formatters"
 import type { ColumnConfig } from "@/lib/columns"
 import type { Torrent } from "@/lib/rpc-types"
+import type { SortKey } from "@/lib/torrent-list-utils"
 import { useI18n } from "@/lib/i18n-context"
-
-type SortKey =
-  | "name"
-  | "status"
-  | "percentDone"
-  | "addedDate"
-  | "editDate"
-  | "uploadedEver"
-  | "rateDownload"
-  | "rateUpload"
-  | "eta"
-  | "uploadRatio"
-  | "labels"
 
 interface TorrentListViewProps {
   paginatedTorrents: Torrent[]
@@ -115,6 +103,8 @@ export function TorrentListView({
         return <TableHead key={column.id} className={getHeaderClassName(column)} style={style} onClick={() => onSort("eta")}><div className="flex items-center justify-end">{t("common.eta")} <SortIcon column="eta" sortConfig={sortConfig} /></div></TableHead>
       case "uploadRatio":
         return <TableHead key={column.id} className={getHeaderClassName(column)} style={style} onClick={() => onSort("uploadRatio")}><div className="flex items-center justify-end">{t("details.share_ratio", "Ratio")} <SortIcon column="uploadRatio" sortConfig={sortConfig} /></div></TableHead>
+      case "labels":
+        return <TableHead key={column.id} className={getHeaderClassName(column)} style={style} onClick={() => onSort("labels")}><div className="flex items-center">{t(column.labelKey, column.defaultLabel)} <SortIcon column="labels" sortConfig={sortConfig} /></div></TableHead>
     }
   }
 
@@ -172,6 +162,21 @@ export function TorrentListView({
         return <TableCell key={column.id} className="text-right"><div className="flex items-center justify-end gap-1.5 text-muted-foreground"><Clock className="h-3.5 w-3.5" /><span className="text-label lowercase">{formatDuration(torrent.eta)}</span></div></TableCell>
       case "uploadRatio":
         return <TableCell key={column.id} className="text-numeric text-right">{torrent.uploadRatio >= 0 ? torrent.uploadRatio.toFixed(2) : "0.00"}</TableCell>
+      case "labels":
+        return (
+          <TableCell key={column.id} className="text-left">
+            <div className="flex flex-wrap gap-1">
+              {torrent.labels?.slice(0, 2).map((label, index) => (
+                <span key={index} className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">
+                  {label}
+                </span>
+              ))}
+              {torrent.labels && torrent.labels.length > 2 && (
+                <span className="text-muted-foreground text-xs">+{torrent.labels.length - 2}</span>
+              )}
+            </div>
+          </TableCell>
+        )
     }
   }
 

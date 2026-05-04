@@ -55,21 +55,11 @@ export function splitSpeed(speed: string): { value: string, unit: string } {
   return { value: match[1], unit: match[2] + "/s" }
 }
 
-export function formatDate(timestamp: number, locale: string = 'en'): string {
-  const date = new Date(timestamp * 1000)
-  return date.toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
 export function formatDate(timestamp: number, locale?: string): string {
   if (!timestamp || timestamp <= 0) return "-"
   const date = new Date(timestamp * 1000)
-  
-  if (locale === 'zh') {
+
+  if (locale === "zh") {
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
@@ -79,11 +69,11 @@ export function formatDate(timestamp: number, locale?: string): string {
   }
 
   return date.toLocaleString(locale || undefined, {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   })
 }

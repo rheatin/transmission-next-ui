@@ -12,7 +12,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react"
-import { EditTorrentDialog } from "@/components/edit-torrent-dialog"
+import { EditTorrentDialog } from "@/components/torrents/edit-torrent-dialog"
 import { cn } from "@/lib/utils"
 import { formatSpeed, formatDuration, getStatusLabel, formatSizeParts, splitSpeed } from "@/lib/formatters"
 import type { Torrent } from "@/lib/rpc-types"

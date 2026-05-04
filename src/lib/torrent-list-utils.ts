@@ -13,6 +13,7 @@ export type SortKey =
   | "rateUpload"
   | "eta"
   | "uploadRatio"
+  | "tracker"
   | "labels"
 
 export type SortConfig = { key: SortKey; direction: "asc" | "desc" }
@@ -103,6 +104,8 @@ export function getTorrentSortValue(torrent: Torrent, key: SortKey): number | st
       return getTorrentLabelsSortValue(torrent.labels)
     case "editDate":
       return torrent.editDate ?? 0
+    case "tracker":
+      return torrent.trackerStats?.[0]?.host ?? ""
     default:
       return torrent[key] ?? 0
   }

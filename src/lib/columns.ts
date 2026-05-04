@@ -52,6 +52,14 @@ export const TORRENT_COLUMNS: ColumnConfig[] = [
     align: "right"
   },
   {
+    id: "labels",
+    labelKey: "common.labels",
+    defaultLabel: "Labels",
+    width: "140px",
+    rpcFields: ["labels"],
+    align: "left"
+  },
+  {
     id: "uploadedEver",
     labelKey: "details.total_uploaded",
     defaultLabel: "Uploaded",

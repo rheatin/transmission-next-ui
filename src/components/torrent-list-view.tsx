@@ -16,7 +16,7 @@ import {
   Trash2,
   Pencil,
 } from "lucide-react"
-import { EditTorrentDialog } from "@/components/edit-torrent-dialog"
+import { EditTorrentDialog } from "@/components/torrents/edit-torrent-dialog"
 import { cn } from "@/lib/utils"
 import { formatSpeed, formatDuration, formatSize, getStatusLabel, formatDate } from "@/lib/formatters"
 import type { ColumnConfig } from "@/lib/columns"
