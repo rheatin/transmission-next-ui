@@ -129,6 +129,19 @@ export default function SettingsPage() {
     return pendingAutoRefresh !== null ? pendingAutoRefresh : autoRefresh
   }
 
+  const formatTime = (value: number | undefined): string => {
+    if (value === undefined || value === null) return ""
+    const hours = Math.floor(value / 60)
+    const minutes = value % 60
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+  }
+
+  const parseTime = (value: string): number => {
+    const [hours, minutes] = value.split(":").map((part) => parseInt(part, 10))
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return 0
+    return hours * 60 + minutes
+  }
+
   const tabs = [
     { id: "general", label: t('settings.tabs.speed'), icon: Zap },
     { id: "transfers", label: t('settings.tabs.transfers'), icon: HardDrive },
@@ -256,6 +269,42 @@ export default function SettingsPage() {
                          <Toggle field="alt-speed-enabled" />
                       </div>
                       
+                      <div className="space-y-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 shrink-0 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                              <Zap className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="text-sm md:text-base font-medium tracking-tight">{t('settings.speed.alt_schedule_title')}</p>
+                              <p className="text-[11px] md:text-xs text-muted-foreground/70">{t('settings.speed.alt_schedule_desc')}</p>
+                            </div>
+                          </div>
+                          <Toggle field="alt-speed-time-enabled" />
+                        </div>
+
+                        <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 transition-opacity", !getValue("alt-speed-time-enabled") && "opacity-50 grayscale pointer-events-none")}>
+                          <div className="space-y-2">
+                            <label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-tighter">{t('settings.speed.alt_time_begin')}</label>
+                            <Input
+                              type="time"
+                              value={formatTime(getValue("alt-speed-time-begin"))}
+                              onChange={(e) => handleChange("alt-speed-time-begin", parseTime(e.target.value))}
+                              className="h-11 md:h-12 rounded-xl bg-muted/40 border-none"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-tighter">{t('settings.speed.alt_time_end')}</label>
+                            <Input
+                              type="time"
+                              value={formatTime(getValue("alt-speed-time-end"))}
+                              onChange={(e) => handleChange("alt-speed-time-end", parseTime(e.target.value))}
+                              className="h-11 md:h-12 rounded-xl bg-muted/40 border-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
                       <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 transition-opacity", !getValue("alt-speed-enabled") && "opacity-50 grayscale pointer-events-none")}>
                         <div className="space-y-2">
                           <label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-tighter">{t('settings.speed.alt_download')} (KB/s)</label>

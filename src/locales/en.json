@@ -230,7 +230,11 @@
       "alt_title": "Alternative Speed Limits (Turtle Mode)",
       "alt_desc": "Applied when scheduled or manually triggered.",
       "alt_download": "Alt Download (KB/s)",
-      "alt_upload": "Alt Upload (KB/s)"
+      "alt_upload": "Alt Upload (KB/s)",
+      "alt_schedule_title": "Turtle Mode Schedule",
+      "alt_schedule_desc": "Use this time range to automatically apply alternative speeds.",
+      "alt_time_begin": "Start Time",
+      "alt_time_end": "End Time"
     },
     "transfers": {
       "title": "Paths & Queue",

@@ -25,11 +25,11 @@ import {
   ShieldCheck,
   Radio,
 } from "lucide-react"
-import { BatchReplaceTrackerDialog } from "@/components/batch-replace-tracker-dialog"
-import { BatchMoveDirectoryDialog } from "@/components/batch-move-directory-dialog"
+import { BatchReplaceTrackerDialog } from "@/components/torrents/batch-replace-tracker-dialog"
+import { BatchMoveDirectoryDialog } from "@/components/torrents/batch-move-directory-dialog"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { RemoveTorrentDialog } from "@/components/remove-torrent-dialog"
+import { RemoveTorrentDialog } from "@/components/torrents/remove-torrent-dialog"
 
 import { useI18n } from "@/lib/i18n-context"
 import { useSearch } from "@/lib/search-context"
@@ -126,6 +126,7 @@ export function TorrentView({ statusFilter, showStats = true }: TorrentViewProps
   const { searchQuery } = useSearch()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isBatchReplaceOpen, setIsBatchReplaceOpen] = useState(false)
+  const [isBatchMoveOpen, setIsBatchMoveOpen] = useState(false)
   const [idsToDelete, setIdsToDelete] = useState<number[]>([])
   const [clickedCard, setClickedCard] = useState<string | null>(null)
   const [pageSize, setPageSize] = useState<number>(() => {
@@ -554,9 +555,22 @@ export function TorrentView({ statusFilter, showStats = true }: TorrentViewProps
         count={idsToDelete.length}
       />
 
+      <RemoveTorrentDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        count={idsToDelete.length}
+      />
+
       <BatchReplaceTrackerDialog
         open={isBatchReplaceOpen}
         onOpenChange={setIsBatchReplaceOpen}
+        onSuccess={fetchData}
+      />
+
+      <BatchMoveDirectoryDialog
+        open={isBatchMoveOpen}
+        onOpenChange={setIsBatchMoveOpen}
         onSuccess={fetchData}
       />
     </div>

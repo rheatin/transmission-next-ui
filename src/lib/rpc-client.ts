@@ -198,16 +198,6 @@ class TransmissionRPC {
   async portTest() {
     return this.request("port-test")
   }
-
-  async verifyTorrents(ids?: TorrentId[]) {
-    const args = ids && ids.length > 0 ? { ids } : {}
-    return this.request("torrent-verify", args)
-  }
-
-  async reannounceTorrents(ids?: TorrentId[]) {
-    const args = ids && ids.length > 0 ? { ids } : {}
-    return this.request("torrent-reannounce", args)
-  }
 }
 
 export const rpc = new TransmissionRPC()

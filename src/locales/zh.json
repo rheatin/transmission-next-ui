@@ -237,7 +237,11 @@
       "alt_title": "备用速度限制 (乌龟模式)",
       "alt_desc": "在定时计划或手动触发时应用。",
       "alt_download": "备用下载限制 (KB/s)",
-      "alt_upload": "备用上传限制 (KB/s)"
+      "alt_upload": "备用上传限制 (KB/s)",
+      "alt_schedule_title": "乌龟模式计划",
+      "alt_schedule_desc": "使用这个时间段自动应用备用速度。",
+      "alt_time_begin": "开始时间",
+      "alt_time_end": "结束时间"
     },
     "transfers": {
       "title": "路径与队列",
