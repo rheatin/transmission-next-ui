@@ -37,6 +37,15 @@ export function getStatusLabel(status: number): string {
   }
   return keys[status] || "status.unknown"
 }
+
+export function getTorrentProgress(status: number, percentDone: number, recheckProgress?: number): number {
+  const normalizedStatus = Number(status)
+  const progress = normalizedStatus === 2 ? (recheckProgress ?? 0) : normalizedStatus === 1 ? 0 : percentDone
+  const normalizedProgress = Number(progress)
+  if (!Number.isFinite(normalizedProgress)) return 0
+  return Math.max(0, Math.min(1, normalizedProgress))
+}
+
 export function formatSizeParts(bytes: number): { value: string, unit: string } {
   if (!bytes || bytes <= 0 || !isFinite(bytes)) return { value: "0", unit: "B" }
   const k = 1024

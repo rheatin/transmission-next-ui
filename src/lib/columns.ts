@@ -32,7 +32,7 @@ export const TORRENT_COLUMNS: ColumnConfig[] = [
     labelKey: "common.progress",
     defaultLabel: "Progress",
     width: "150px",
-    rpcFields: ["percentDone", "totalSize"],
+    rpcFields: ["percentDone", "recheckProgress", "totalSize"],
     align: "left"
   },
   {
@@ -127,6 +127,7 @@ export const BASE_RPC_FIELDS = [
 export const GRID_MODE_RPC_FIELDS = [
   "totalSize",
   "percentDone",
+  "recheckProgress",
   "rateDownload",
   "rateUpload",
   "eta"

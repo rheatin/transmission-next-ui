@@ -123,6 +123,14 @@ test("filterTorrents supports semantic status filters and label/tracker/search f
   expect(filterTorrents(torrents, { searchQuery: "ubuntu", translateStatus }).map(({ id }) => id)).toEqual([1])
 })
 
+test("filterTorrents keeps verification tasks out of downloading", () => {
+  const checkingTorrent = { ...torrents[1], id: 4, status: 2 as const }
+  const withChecking = [...torrents, checkingTorrent]
+
+  expect(filterTorrents(withChecking, { statusFilter: "downloading", translateStatus }).map(({ id }) => id)).toEqual([2])
+  expect(filterTorrents(withChecking, { statusFilter: "checking", translateStatus }).map(({ id }) => id)).toEqual([4])
+})
+
 test("sortTorrents sorts by regular and derived fields", () => {
   expect(sortTorrents(torrents, { key: "addedDate", direction: "asc" }).map(({ id }) => id)).toEqual([1, 3, 2])
   expect(sortTorrents(torrents, { key: "labels", direction: "asc" }).map(({ id }) => id)).toEqual([3, 1, 2])

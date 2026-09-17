@@ -10,6 +10,7 @@ function AppRoutes() {
       <Route path="/" element={<TorrentView key="all" />} />
       <Route path="/active" element={<TorrentView key="active" statusFilter="active" showStats={false} />} />
       <Route path="/downloading" element={<TorrentView key="downloading" statusFilter="downloading" showStats={false} />} />
+      <Route path="/checking" element={<TorrentView key="checking" statusFilter="checking" showStats={false} />} />
       <Route path="/paused" element={<TorrentView key="paused" statusFilter="Paused" showStats={false} />} />
       <Route path="/seeding" element={<TorrentView key="seeding" statusFilter="Seeding" showStats={false} />} />
       <Route path="/settings" element={<SettingsPage key="settings" />} />

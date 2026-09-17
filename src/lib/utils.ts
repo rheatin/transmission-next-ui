@@ -15,6 +15,10 @@ export function isDownloadingTorrent(torrent: Torrent): boolean {
   return [3, 4].includes(torrent.status)
 }
 
+export function isCheckingTorrent(torrent: Torrent): boolean {
+  return [1, 2].includes(torrent.status)
+}
+
 export function isSeedingTorrent(torrent: Torrent): boolean {
   return [5, 6].includes(torrent.status)
 }

@@ -79,7 +79,9 @@ export function filterTorrents(torrents: Torrent[], options: TorrentFilterOption
       if (statusLower === "active") {
         if (!(torrent.rateDownload > 0 || torrent.rateUpload > 0)) return false
       } else if (statusLower === "downloading") {
-        if (![4, 3, 2, 1].includes(torrent.status)) return false
+        if (![4, 3].includes(torrent.status)) return false
+      } else if (statusLower === "checking" || statusLower === "verifying") {
+        if (![1, 2].includes(torrent.status)) return false
       } else if (statusLower === "seeding") {
         if (![6, 5].includes(torrent.status)) return false
       } else if (statusLower === "stopped" || statusLower === "paused") {

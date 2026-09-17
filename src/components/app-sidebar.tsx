@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Activity,
   ArrowDownCircle,
+  ShieldCheck,
   ArrowUpCircle,
   PauseCircle,
   Settings,
@@ -35,7 +36,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { cn, countTorrents } from "@/lib/utils"
+import { cn, countTorrents, isCheckingTorrent } from "@/lib/utils"
 import { useLocation } from "react-router-dom"
 import { useI18n } from "@/lib/i18n-context"
 import { APP_CONFIG } from "@/lib/config"
@@ -59,6 +60,11 @@ const data = {
       title: "Downloading",
       url: "/downloading",
       icon: ArrowDownCircle,
+    },
+    {
+      title: "Checking",
+      url: "/checking",
+      icon: ShieldCheck,
     },
     {
       title: "Seeding",
@@ -86,13 +92,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation()
   const { t } = useI18n()
   const { refreshInterval, autoRefresh } = useAppSettings()
-  const [counts, setCounts] = useState({ all: 0, active: 0, downloading: 0, seeding: 0, paused: 0 })
+  const [counts, setCounts] = useState({ all: 0, active: 0, downloading: 0, checking: 0, seeding: 0, paused: 0 })
 
   const getTitle = (title: string) => {
     const keyMap: Record<string, string> = {
       "All Torrents": "common.all_torrents",
       "Active": "common.active",
       "Downloading": "common.downloading",
+      "Checking": "common.checking",
       "Seeding": "common.seeding",
       "Paused": "common.paused",
       "Settings": "common.settings"
@@ -108,6 +115,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         return counts.active
       case "Downloading":
         return counts.downloading
+      case "Checking":
+        return counts.checking
       case "Seeding":
         return counts.seeding
       case "Paused":
@@ -126,7 +135,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         if (!isMounted || !result?.torrents) return
 
         const torrents = result.torrents as Torrent[]
-        setCounts(countTorrents(torrents))
+        const nextCounts = countTorrents(torrents)
+        setCounts({ ...nextCounts, checking: torrents.filter(isCheckingTorrent).length })
       } catch (err) {
         console.error("Failed to load torrent counts:", err)
       }

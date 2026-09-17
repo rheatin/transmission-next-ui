@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { EditTorrentDialog } from "@/components/torrents/edit-torrent-dialog"
 import { cn } from "@/lib/utils"
-import { formatSpeed, formatDuration, getStatusLabel, formatSizeParts, splitSpeed } from "@/lib/formatters"
+import { formatSpeed, formatDuration, getStatusLabel, getTorrentProgress, formatSizeParts, splitSpeed } from "@/lib/formatters"
 import type { Torrent } from "@/lib/rpc-types"
 import { useI18n } from "@/lib/i18n-context"
 
@@ -31,11 +31,14 @@ export function TorrentGridView({
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {paginatedTorrents.map((torrent) => (
-        <Card
-          key={torrent.id}
-          className="group relative shadow-md border-none overflow-hidden hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 bg-sidebar/30 flex flex-col py-0"
-        >
+      {paginatedTorrents.map((torrent) => {
+        const progress = getTorrentProgress(torrent.status, torrent.percentDone, torrent.recheckProgress)
+
+        return (
+          <Card
+            key={torrent.id}
+            className="group relative shadow-md border-none overflow-hidden hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 bg-sidebar/30 flex flex-col py-0"
+          >
           <CardHeader className="pb-3 pt-4 border-b border-muted/50 bg-background/50">
             <div className="min-w-0 space-y-1">
               <Link to={`/torrents/detail?id=${torrent.id}`} className="block group-hover:text-primary transition-colors">
@@ -80,12 +83,12 @@ export function TorrentGridView({
             <div className="space-y-2">
               <div className="flex justify-between text-label">
                 <span>{t('common.progress')}</span>
-                <span className="text-primary">{(torrent.percentDone * 100).toFixed(1)}%</span>
+                <span className="text-primary">{(progress * 100).toFixed(1)}%</span>
               </div>
               <div className="w-full bg-muted/50 rounded-full h-2.5 overflow-hidden">
                 <div
                   className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(var(--primary),0.4)]"
-                  style={{ width: `${torrent.percentDone * 100}%` }}
+                  style={{ width: `${progress * 100}%` }}
                 ></div>
               </div>
             </div>
@@ -142,8 +145,9 @@ export function TorrentGridView({
               )}
             </div>
           </CardFooter>
-        </Card>
-      ))}
+          </Card>
+        )
+      })}
     </div>
   )
 }

@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 import { EditTorrentDialog } from "@/components/torrents/edit-torrent-dialog"
 import { cn } from "@/lib/utils"
-import { formatSpeed, formatDuration, formatSize, getStatusLabel, formatDate } from "@/lib/formatters"
+import { formatSpeed, formatDuration, formatSize, getStatusLabel, getTorrentProgress, formatDate } from "@/lib/formatters"
 import type { ColumnConfig } from "@/lib/columns"
 import type { Torrent } from "@/lib/rpc-types"
 import type { SortKey } from "@/lib/torrent-list-utils"
@@ -137,17 +137,19 @@ export function TorrentListView({
             </span>
           </TableCell>
         )
-      case "progress":
+      case "progress": {
+        const progress = getTorrentProgress(torrent.status, torrent.percentDone, torrent.recheckProgress)
         return (
           <TableCell key={column.id}>
             <div className="w-full bg-muted rounded-full h-2 min-w-[100px]">
-              <div className="bg-primary h-2 rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(var(--primary),0.5)]" style={{ width: `${torrent.percentDone * 100}%` }} />
+              <div className="bg-primary h-2 rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(var(--primary),0.5)]" style={{ width: `${progress * 100}%` }} />
             </div>
             <span className="text-label mt-1.5 block">
-              {(torrent.percentDone * 100).toFixed(1)}% • {formatSize(torrent.totalSize)}
+              {(progress * 100).toFixed(1)}% • {formatSize(torrent.totalSize)}
             </span>
           </TableCell>
         )
+      }
       case "addedDate":
         return <TableCell key={column.id} className="text-numeric text-right text-muted-foreground text-xs">{formatDate(torrent.addedDate, locale)}</TableCell>
       case "editDate":
