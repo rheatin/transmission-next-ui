@@ -133,6 +133,21 @@ else
     echo "ℹ️  docker-compose.yml already exists, skipping download."
 fi
 
+# Same-container torrent creation service sources.
+SOURCE_REF="$TAG_NAME"
+if [ "$SOURCE_REF" = "latest" ]; then SOURCE_REF="main"; fi
+mkdir -p torrent-helper/custom-services.d
+for HELPER_FILE in server.py config.example.json custom-services.d/transmission-torrent-create; do
+    if [ ! -f "torrent-helper/$HELPER_FILE" ]; then
+        echo "📥 Downloading torrent creation service file: $HELPER_FILE"
+        if ! curl -L -f -o "torrent-helper/$HELPER_FILE" "https://raw.githubusercontent.com/$REPO/$SOURCE_REF/torrent-helper/$HELPER_FILE"; then
+            echo "❌ Error: Failed to download torrent creation service file: $HELPER_FILE" >&2
+            exit 1
+        fi
+    fi
+done
+chmod 755 torrent-helper/custom-services.d/transmission-torrent-create
+
 echo ""
 echo "🎉 Setup complete! You can now start the service with:"
 echo "   docker-compose up -d"

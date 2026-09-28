@@ -1,1 +1,2 @@
 pic/*.png filter=lfs diff=lfs merge=lfs -text
+torrent-helper/custom-services.d/* text eol=lf

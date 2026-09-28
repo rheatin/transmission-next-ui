@@ -16,9 +16,12 @@ services:
       - ./web/src:/src
       - ./config:/config
       - ./downloads:/downloads
+      - ./torrent-helper:/config/torrent-create:ro
+      - ./torrent-helper/custom-services.d:/custom-services.d:ro
       - ./watch:/watch
     ports:
       - "9091:9091"
+      - "3001:3001"
       - "51413:51413"
       - "51413:51413/udp"
 

@@ -21,6 +21,7 @@ import {
   LayoutGrid,
   List,
   FolderOpen,
+  FolderPlus,
   Columns,
   GripVertical,
   EyeOff,
@@ -37,6 +38,7 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import { AddTorrentDialog } from "@/components/add-torrent-dialog"
+import { CreateTorrentDialog } from "@/components/create-torrent-dialog"
 import { FilterPanel } from "@/components/torrents/filter-panel"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/lib/i18n-context"
@@ -320,6 +322,13 @@ export function TorrentToolbar({
               <span className="hidden md:inline">{t('common.add_torrent')}</span>
             </Button>
           </AddTorrentDialog>
+          <CreateTorrentDialog onSuccess={fetchData}>
+            <Button variant="outline" className="ml-1 h-8 px-2 md:px-3 rounded-lg font-medium gap-2 text-xs">
+              <FolderPlus className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">{t('common.create_torrent.title')}</span>
+              <span className="sr-only">{t('common.create_torrent.title')}</span>
+            </Button>
+          </CreateTorrentDialog>
         </div>
 
         <div className="flex items-center bg-muted/60 p-1 rounded-xl gap-1 shrink-0">

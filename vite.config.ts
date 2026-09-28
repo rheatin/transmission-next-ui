@@ -13,6 +13,7 @@ export default defineConfig(() => {
     test: {
       environment: "jsdom",
       setupFiles: "./src/test/setup.ts",
+      include: ["src/**/*.{test,spec}.{ts,tsx}"],
     },
     resolve: {
       alias: [
@@ -28,6 +29,11 @@ export default defineConfig(() => {
         "/transmission": {
           target: "http://127.0.0.1:9091",
           changeOrigin: true,
+        },
+        "/torrent-helper": {
+          target: "http://127.0.0.1:3001",
+          changeOrigin: false,
+          rewrite: (path) => path.replace(/^\/torrent-helper/, ""),
         },
       },
     },

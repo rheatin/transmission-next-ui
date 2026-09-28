@@ -39,6 +39,7 @@ English | [简体中文](README.md)
 - [x] Batch Replace Trackers
 - [x] Batch Move Download Directory
 - [x] Batch Set Torrent Labels
+- [x] Create torrents from directories accessible to Transmission
 
 ⚠️**Notice**: This is an early version of the project. It has not been fully tested yet. Please verify its functionality before using it in production.
 
@@ -64,6 +65,32 @@ curl -fsSL https://raw.githubusercontent.com/hisproc/transmission-next-ui/main/d
 
 This will download the latest release and create a `docker-compose.yml` file in your current directory.
 
+### Create a Torrent
+
+Torrent creation runs inside the Transmission container using its existing `transmission-create` binary; no second container or token is required. Copy the config template on first setup:
+
+```bash
+cp torrent-helper/config.example.json torrent-helper/config.json
+```
+
+Set `allowed_roots` to data paths inside the Transmission container. For QNAP, examples include `/share/NAS/Downloads`, `/share/Private`, `/share/incompleted`, and `/downloads`. Do not allow all of `/share`, which also contains application data. Set `host` to the Transmission container's LAN address; for a regular Docker bridge deployment use `0.0.0.0` and publish the API only to a trusted LAN.
+
+Compose must mount the service source and LinuxServer startup script into the container. The repository `docker-compose.yml` includes these mounts; add the following to a custom Compose file:
+
+```yaml
+services:
+  transmission:
+    volumes:
+      - ./torrent-helper:/config/torrent-create:ro
+      - ./torrent-helper/custom-services.d:/custom-services.d:ro
+    ports:
+      - "3001:3001"
+```
+
+Make the startup script executable before applying the Compose changes. The service starts with the container, and these mounts persist across upgrades and recreations. Keep TCP port `3001` on a trusted LAN and do not expose it publicly.
+
+In the Web UI, select **Create Torrent**, enter an absolute path inside the container (for example, `/share/NAS/Downloads/Movies`), and validate it. Add trackers and set options such as private mode and piece size, then create the torrent. When complete, download the `.torrent` file or add it to Transmission and verify existing data.
+
 You can now modify the `docker-compose.yml` file to set your own **Transmission username**, **password**, and **timezone**:
 
 ```yaml
@@ -85,6 +112,7 @@ The following ports are mapped by default:
 | Port | Protocol | Purpose |
 | --- | --- | --- |
 | `9091` | TCP | Web UI and RPC interface — access the Web UI at `http://localhost:9091` |
+| `3001` | TCP | Same-container torrent creation API; trusted networks only |
 | `51413` | TCP/UDP | BitTorrent data transfer — used for peer connections; keeping this port open improves download performance |
 
 If you have modified the port settings in Transmission's configuration file located in the `config` directory, please ensure that you also update the corresponding port mappings in the `docker-compose.yml` file to reflect those changes.
@@ -105,7 +133,7 @@ pnpm install
 pnpm build
 ```
 
-Then, copy the contents of the `dist/` folder to your transmission web directory.
+Then, copy the contents of the `dist/` folder to your Transmission web directory. The service source and LinuxServer custom service must be mounted into the container through Compose; copying `dist/` alone does not update the server-side service.
 
 ## License
 
